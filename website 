@@ -1,0 +1,562 @@
+"use client"
+
+import CTAButton from "./components/CTAButton"
+import { useEffect, useState } from "react"
+
+const services = [
+  "Operational Workflows",
+  "AI-Powered Automations",
+  "Optimised Marketing Systems",
+  "Lead Generation & Nurturing",
+  "24/7 Admin Support",
+  "Optimised Online Presence",
+  "Scalable Business Infrastructure"
+]
+
+export default function Home() {
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % services.length)
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <main>
+      {/* HERO SECTION */}
+      <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
+         {/* Logo */}
+    <div className="absolute top-6 left-6 z-10">
+      <img
+        src="/logo.png"
+        alt="Your Company Name"
+        className="h-28 w-auto"
+      />
+    </div>
+        {/* Background vertical lines */}
+        <div className="absolute inset-0 opacity-40 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:24px_24px]" />
+
+        {/* Content */}
+        <div className="relative z-10 text-center max-w-4xl px-6">
+
+          {/* Main headline */}
+          <h1 className="text-5xl md:text-6xl font-black text-white leading-tight">
+            Grow Your Business With Transformative
+          </h1>
+
+          {/* Rotating services */}
+          <div className="mt-4 h-[56px] overflow-hidden">
+            <p
+              key={index}
+              className="text-4xl md:text-5xl text-teal-200 font-medium animate-slide-up"
+            >
+              {services[index]}
+            </p>
+          </div>
+
+          {/* Subheading */}
+          <p className="mt-6 text-gray-300 font-semibold max-w-4xl mx-auto">
+            End-to-end systems that remove you as the bottleneck - giving you a business that runs smoothly, scales predictably, and supports your life instead of consuming it.
+          </p>
+          {/* CTA */}
+          <div className="mt-12 flex justify-center">
+            <CTAButton />
+          </div>
+{/* Feature stats */}
+<div className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-12 text-center">
+
+  {/* Stat 1 */}
+  <div>
+    <p className="text-4xl font-bold text-teal-300">
+      24/7
+    </p>
+    <p className="mt-2 text-gray-400">
+    Availability
+    </p>
+  </div>
+
+  {/* Stat 2 */}
+  <div>
+    <p className="text-4xl font-bold text-teal-300">
+      100%
+    </p>
+    <p className="mt-2 text-gray-400">
+      Client Success
+    </p>
+  </div>
+
+  {/* Stat 3 */}
+  <div>
+    <p className="text-4xl font-bold text-teal-300 flex justify-center items-center gap-1">
+      5
+      <span className="text-yellow-400">★</span>
+    </p>
+    <p className="mt-2 text-gray-400">
+      Google Star rating
+    </p>
+  </div>
+
+</div>
+
+
+        </div>
+      </section>
+
+      {/* VSL SECTION */}
+      <section className="w-full bg-black py-24 px-6">
+        <div className="mx-auto max-w-6xl text-center">
+
+          {/* VSL Heading */}
+          <h2 className="text-4xl md:text-5xl font-semibold text-white mb-4">
+            See How Trade Businesses Automate Growth
+          </h2>
+
+          {/* VSL Subheading */}
+          <p className="text-lg md:text-xl text-neutral-400 max-w-3xl mx-auto mb-12">
+            A short walkthrough of how AI-powered systems remove admin, capture more leads, and let your business run without constant interruptions.
+          </p>
+
+          {/* YouTube VSL Placeholder */}
+          <div className="relative w-full aspect-video rounded-2xl border border-neutral-800 bg-neutral-900 flex items-center justify-center shadow-xl overflow-hidden">
+
+            {/* Replace this div with your embedded YouTube iframe later */}
+            <div className="flex flex-col items-center text-neutral-400">
+              <div className="mb-4 text-sm uppercase tracking-widest">
+                Video Coming Soon
+              </div>
+
+              <div className="w-20 h-20 rounded-full border border-neutral-700 flex items-center justify-center text-2xl">
+                ▶
+              </div>
+
+              <p className="mt-4 text-sm">
+                This is where your VSL will live
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="py-24 bg-black">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Header */}
+          <div className="text-center max-w-5xl mx-auto">
+            <h2 className="text-5xl md:text-5xl font-bold text-white">
+              The <span className="text-teal-400">3-Step</span> Transformation
+            </h2>
+            <p className="mt-6 text-lg text-gray-300">
+              No two businesses share the same systems, goals, or structures. That's why every client goes through this process, ensuring the results we deliver are aligned with what matters most to you.
+            </p>
+          </div>
+
+          {/* Cards */}
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Card 1 */}
+            <div className="rounded-2xl bg-gray-700 p-8 shadow-lg">
+              <h3 className="text-2xl font-black text-white">Step 1: Audit</h3>
+              <p className="mt-4 text-teal-50">
+                We analyze your core systems, from internal workflows to external marketing, to pinpoint inefficiencies. Our goal is to transform your current operations into a high-performance engine fueled by strategic automation.
+              </p>
+
+              <ul className="mt-6 space-y-4">
+                {[
+                  "Architectural Visualization & Playbooks",
+                  "Friction Diagnostics & Performance Baselines",
+                  "Vulnerability Mapping & Contingency Planning",
+                  "Economic Impact & Profit-Leak Analysis",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-black text-teal-400 text-sm">
+                      ✓
+                    </span>
+                    <span className="text-white">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Card 2 */}
+            <div className="rounded-2xl bg-gray-700 p-8 shadow-lg">
+              <h3 className="text-2xl font-black text-white">Step 2: Consultation</h3>
+              <p className="mt-4 text-blue-50">
+                We don't just hand over a report and walk away - we present a clear, actionable roadmap and kickstart the implementation process, allowing you to see tangible benefits of our strategy before you commit to a long-term investment.
+              </p>
+
+              <ul className="mt-6 space-y-4">
+                {[
+                  "Rapid Prototyping & Quick Wins",
+                  "Operational Proof-of-Concept",
+                  "Seamless Integration Support",
+                  "Performance Validation & ROI Benchmarking",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-black text-teal-400 text-sm">
+                      ✓
+                    </span>
+                    <span className="text-white">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Card 3 */}
+            <div className="rounded-2xl bg-gray-700 p-8 shadow-lg">
+              <h3 className="text-2xl font-semibold text-white">Step 3: Action</h3>
+              <p className="mt-4 text-teal-50">
+                We fully integrate AI-driven automations across your operations and marketing, targeting every point of leverage to eliminate manual overhead and unlock exponential growth.
+              </p>
+
+              <ul className="mt-6 space-y-4">
+                {[
+                  "Autonomous Operational Engines",
+                  "Total Cross-Departmental Synchronization",
+                  "Infinite Scalability without Complexity",
+                  "Human-Centric High-Value Focus",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-black text-teal-400 text-sm">
+                      ✓
+                    </span>
+                    <span className="text-white">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="flex justify-center">
+            <a
+              href="/book-call"
+              className="inline-flex items-center gap-2 mt-12 px-8 py-4 border border-teal-200 text-teal-100 rounded-xl hover:bg-teal-200 hover:text-black transition"
+            >
+              Start Your 3-Step Process Now →
+            </a>
+          </div>
+        </div>
+      </section>
+      <section className="py-24 bg-black border-t border-gray-800">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Header */}
+          <div className="text-center max-w-7xl mx-auto">
+            <h2 className="text-7xl font-bold text-white">
+              From the <span className="text-teal-400">Blog</span>
+            </h2>
+            <p className="mt-6 text-lg text-gray-300">
+            Free resources, insights, and practical tips designed to help trade businesses grow to their full potential using smart digital systems.
+            </p>
+          </div>
+
+          {/* Blog Cards */}
+          <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                title: "Why Most Automation Projects Fail",
+                excerpt:
+                  "The hidden mistakes companies make when implementing automation — and how to avoid them.",
+                slug: "/blog/automation-projects-fail",
+                image: "/blog/automation-fail.jpg",
+              },
+              {
+                title: "The 3 Systems Every Scalable Business Needs",
+                excerpt:
+                  "If your business feels stuck, these are the systems likely holding you back.",
+                slug: "/blog/essential-business-systems",
+                image: "/blog/business-systems.jpg",
+              },
+              {
+                title: "Process Before Tools: A Better Way to Automate",
+                excerpt:
+                  "Why choosing software too early often leads to more complexity, not less.",
+                slug: "/blog/process-before-tools",
+                image: "/blog/process-before-tools.jpg",
+              },
+              {
+                title: "How to Identify Automation Opportunities",
+                excerpt:
+                  "A practical framework for spotting high-ROI automation opportunities.",
+                slug: "/blog/identify-automation.jpg",
+                image: "/blog/automation-opportunities.jpg",
+              },
+            ].map((post) => (
+              <a
+                key={post.slug}
+                href={post.slug}
+                className="group overflow-hidden rounded-2xl bg-gray-900 border border-gray-800 hover:border-teal-400 transition"
+              >
+                {/* Thumbnail */}
+                <div className="aspect-[16/10] overflow-hidden">
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-white group-hover:text-teal-400 transition">
+                    {post.title}
+                  </h3>
+                  <p className="mt-3 text-sm text-gray-400">{post.excerpt}</p>
+                  <span className="mt-6 inline-block text-sm font-medium text-teal-400">
+                    Read more →
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+        <div className="mt-16 flex justify-center">
+  <a
+    href="/blog"
+    className="px-8 py-4 border border-teal-200 text-teal-100 rounded-xl hover:bg-teal-200 hover:text-black transition"
+  >
+    View all blog posts →
+  </a>
+</div>
+      </section>
+      <section className="py-4 bg-black border-t border-gray-800">
+        <div className="max-w-10xl mx-auto px-6"></div>
+        </section>
+{/* FAQ SECTION */}
+<section className="bg-gradient-to-b from-black via-gray-900 to-black py-24 px-6">
+  <div className="max-w-5xl mx-auto">
+
+    <p className="text-teal-400 text-sm uppercase tracking-widest text-center mb-4">
+      FAQs
+    </p>
+
+    <h2 className="text-4xl md:text-5xl font-bold text-center text-white mb-6">
+      Frequently Asked <span className="text-teal-400">Questions</span>
+    </h2>
+
+    <p className="text-gray-400 text-center max-w-2xl mx-auto mb-16">
+      Clear answers to the questions most business owners ask before getting started.
+    </p>
+
+    <div className="space-y-4">
+
+      {/* FAQ 1 */}
+      <details className="group border border-teal-400/10 rounded-3xl transition-colors hover:border-teal-400 open:border-teal-400">
+        <summary className="cursor-pointer list-none px-6 py-6 flex justify-between items-center">
+          <span className="font-bold text-lg md:text-xl text-white transition-colors group-hover:text-teal-400 group-open:text-teal-400">
+            How is this different from any other agency or freelancer?
+          </span>
+          <span className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+        </summary>
+        <div className="px-6 pb-6 text-gray-400 space-y-3">
+          <p>Most agencies and freelancers focus on individual tasks delivered in isolation.</p>
+          <p>We build connected systems across your entire business.</p>
+          <p>
+            Instead of more tools to manage, we design workflows that link enquiries, operations,
+            admin, and growth — without relying on you to oversee everything.
+          </p>
+          <p>
+            The outcome isn't more activity. It's a business that runs smoothly, scales with control,
+            and doesn't depend on you.
+          </p>
+        </div>
+      </details>
+
+      {/* FAQ 2 */}
+      <details className="group border border-teal-400/10 rounded-3xl transition-colors hover:border-teal-400 open:border-teal-400">
+        <summary className="cursor-pointer list-none px-6 py-6 flex justify-between items-center">
+          <span className="font-bold text-lg md:text-xl text-white transition-colors group-hover:text-teal-400 group-open:text-teal-400">
+            Will this actually work for a trade or service business like mine?
+          </span>
+          <span className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+        </summary>
+        <div className="px-6 pb-6 text-gray-400 space-y-3">
+          <p>Yes, trade and service businesses are ideal for this.</p>
+          <p>
+            They often have strong demand but weak systems, which makes the owner the bottleneck.
+            That's exactly what we fix.
+          </p>
+          <p>
+            Everything is built around how your business actually operates — not generic theory.
+          </p>
+        </div>
+      </details>
+
+      {/* FAQ 3 */}
+      <details className="group border border-teal-400/10 rounded-3xl transition-colors hover:border-teal-400 open:border-teal-400">
+        <summary className="cursor-pointer list-none px-6 py-6 flex justify-between items-center">
+          <span className="font-bold text-lg md:text-xl text-white transition-colors group-hover:text-teal-400 group-open:text-teal-400">
+            How involved do I need to be once things are set up?
+          </span>
+          <span className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+        </summary>
+        <div className="px-6 pb-6 text-gray-400 space-y-3">
+          <p>Very little.</p>
+          <p>
+            Upfront, we get clarity on how you operate and where the friction is. After that,
+            everything is built for you.
+          </p>
+          <p>
+            Once live, systems handle the work and you step in only where decisions genuinely matter.
+          </p>
+        </div>
+      </details>
+
+      {/* FAQ 4 */}
+      <details className="group border border-teal-400/10 rounded-3xl transition-colors hover:border-teal-400 open:border-teal-400">
+        <summary className="cursor-pointer list-none px-6 py-6 flex justify-between items-center">
+          <span className="font-bold text-lg md:text-xl text-white transition-colors group-hover:text-teal-400 group-open:text-teal-400">
+            Will I still have visibility and control over my business?
+          </span>
+          <span className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+        </summary>
+        <div className="px-6 pb-6 text-gray-400 space-y-3">
+          <p>Yes, you gain more control, not less.</p>
+          <p>
+            Visibility is built into the systems so you always know what's happening without
+            micromanaging.
+          </p>
+        </div>
+      </details>
+
+      {/* FAQ 5 */}
+      <details className="group border border-teal-400/10 rounded-3xl transition-colors hover:border-teal-400 open:border-teal-400">
+        <summary className="cursor-pointer list-none px-6 py-6 flex justify-between items-center">
+          <span className="font-bold text-lg md:text-xl text-white transition-colors group-hover:text-teal-400 group-open:text-teal-400">
+            What happens if I want to change or adjust systems later?
+          </span>
+          <span className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+        </summary>
+        <div className="px-6 pb-6 text-gray-400 space-y-3">
+          <p>Nothing is locked in.</p>
+          <p>
+            Everything is custom-built, documented, and designed to evolve as your business grows.
+          </p>
+        </div>
+      </details>
+
+      {/* FAQ 6 */}
+      <details className="group border border-teal-400/10 rounded-3xl transition-colors hover:border-teal-400 open:border-teal-400">
+        <summary className="cursor-pointer list-none px-6 py-6 flex justify-between items-center">
+          <span className="font-bold text-lg md:text-xl text-white transition-colors group-hover:text-teal-400 group-open:text-teal-400">
+            How much of my time does setup take?
+          </span>
+          <span className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+        </summary>
+        <div className="px-6 pb-6 text-gray-400 space-y-3">
+          <p>Less than continuing to do everything yourself.</p>
+          <p>
+            Setup is focused and efficient. Your time investment drops almost entirely once systems go live.
+          </p>
+        </div>
+      </details>
+
+      {/* FAQ 7 */}
+      <details className="group border border-teal-400/10 rounded-3xl transition-colors hover:border-teal-400 open:border-teal-400">
+        <summary className="cursor-pointer list-none px-6 py-6 flex justify-between items-center">
+          <span className="font-bold text-lg md:text-xl text-white transition-colors group-hover:text-teal-400 group-open:text-teal-400">
+            Will this add more complexity to my business?
+          </span>
+          <span className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+        </summary>
+        <div className="px-6 pb-6 text-gray-400 space-y-3">
+          <p>No, it completely removes it.</p>
+          <p>
+            Systems replace chaos and mental load with structure, clarity, and simplicity.
+          </p>
+        </div>
+      </details>
+
+      {/* FAQ 8 */}
+      <details className="group border border-teal-400/10 rounded-3xl transition-colors hover:border-teal-400 open:border-teal-400">
+        <summary className="cursor-pointer list-none px-6 py-6 flex justify-between items-center">
+          <span className="font-bold text-lg md:text-xl text-white transition-colors group-hover:text-teal-400 group-open:text-teal-400">
+            Who is this not a good fit for?
+          </span>
+          <span className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+        </summary>
+        <div className="px-6 pb-6 text-gray-400 space-y-3">
+          <ul className="list-disc list-inside space-y-1">
+            <li>Businesses happy staying small</li>
+            <li>Owners looking for shortcuts</li>
+            <li>People unwilling to modernise</li>
+            <li>Anyone shopping purely on price</li>
+          </ul>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+<section className="bg-gradient-to-b from-black via-gray-900 to-black px-6 py-24">
+  <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-10">
+
+    {/* Heading */}
+    <div className="text-white">
+      <h2 className="text-6xl md:text-7xl font-bold mb-6 text-teal-400">
+        Get in touch
+      </h2>
+      <p className="text-gray-400">
+        Have a question or want to explore whether this is a fit?
+        Leave your details and ask any questions you may have, we'll get back to you within 24 hours.
+      </p>
+    </div>
+
+    {/* Contact form */}
+    <form className="w-full bg-black/40 border border-white/10 rounded-3xl p-8 space-y-6">
+      <input
+        type="text"
+        placeholder="Your name"
+        className="w-full px-4 py-4 rounded-xl bg-black border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-teal-400"
+      />
+
+      <input
+        type="email"
+        placeholder="Your email"
+        className="w-full px-4 py-4 rounded-xl bg-black border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-teal-400"
+      />
+
+      <textarea
+        placeholder="Your message"
+        rows={4}
+        className="w-full px-4 py-4 rounded-xl bg-black border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-teal-400"
+      />
+
+      <button
+        type="submit"
+        className="w-full py-4 rounded-3xl bg-teal-400 text-black font-bold hover:bg-teal-300 transition"
+      >
+        Send message →
+      </button>
+    </form>
+
+  </div>
+
+  {/* Footer bottom */}
+  <div className="max-w-6xl mx-auto mt-20 border-t border-white/10 pt-10 flex flex-col md:flex-row items-center justify-between gap-6">
+
+    {/* Social links */}
+    <div className="flex items-center gap-6 text-gray-400">
+      <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition">
+        Facebook
+      </a>
+      <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition">
+        Instagram
+      </a>
+      <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition">
+        YouTube
+      </a>
+    </div>
+
+    {/* Copyright */}
+    <p className="text-gray-500 text-sm">
+      © {new Date().getFullYear()} JP Automations. All rights reserved.
+    </p>
+
+  </div>
+</section>
+
+
+
+    </main>
+  )
+}
