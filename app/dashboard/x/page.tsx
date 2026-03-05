@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/app/components/AuthProvider"
 import UserMenu from "@/app/components/UserMenu"
@@ -9,6 +9,7 @@ import { AppsDropdown, AppsMobileLinks } from "@/app/components/AppsDropdown"
 type Mode = "tweet" | "thread"
 type Goal = "Brand Awareness" | "Lead Generation" | "Community Building" | "Sales & Conversions" | "Education & Authority"
 type ThreadType = "Educational" | "How-To" | "Story" | "Case Study" | "Hot Take" | "Social Proof"
+type Tone = "Direct" | "Casual" | "Bold" | "Witty" | "Educational" | "Inspirational" | "Story" | "Professional"
 
 const GOALS: Goal[] = [
   "Brand Awareness",
@@ -25,6 +26,17 @@ const THREAD_TYPES: ThreadType[] = [
   "Case Study",
   "Hot Take",
   "Social Proof",
+]
+
+const TONES: { value: Tone; desc: string }[] = [
+  { value: "Direct", desc: "Sharp, no fluff" },
+  { value: "Casual", desc: "Friendly, relatable" },
+  { value: "Bold", desc: "Provocative takes" },
+  { value: "Witty", desc: "Clever, punchy" },
+  { value: "Educational", desc: "Clear, authoritative" },
+  { value: "Inspirational", desc: "Motivational" },
+  { value: "Story", desc: "Narrative, personal" },
+  { value: "Professional", desc: "Polished, credible" },
 ]
 
 const TOKEN_COSTS: Record<Mode, number> = {
@@ -123,6 +135,35 @@ function CopyAllButton({ tweets }: { tweets: ThreadTweet[] }) {
   )
 }
 
+function buildPromptPreview({
+  mode, topic, goal, tone, threadType, masterPrompt, temperature,
+}: {
+  mode: Mode; topic: string; goal: Goal; tone: Tone; threadType: ThreadType; masterPrompt: string; temperature: number
+}): string {
+  const lines = [
+    `── SYSTEM ──────────────────────────────`,
+    `Role: Elite X (Twitter) ${mode === "tweet" ? "copywriter" : "thread writer"}`,
+    `Goal directive: Serve the goal of "${goal}"`,
+    `Tone: ${tone}`,
+    `Temperature: ${temperature.toFixed(2)}`,
+    masterPrompt.trim() ? `\nMaster Prompt (your custom rules):\n${masterPrompt.trim()}` : "",
+    `\n── USER REQUEST ────────────────────────`,
+    `Mode: ${mode === "tweet" ? "Single Tweet — generate 3 variants" : `Thread — ${threadType} format`}`,
+    `Topic: ${topic.trim() || "(not entered yet)"}`,
+    `Goal: ${goal}`,
+    `Tone: ${tone}`,
+    `Business Context: [Fetched from your saved profile]`,
+    `\n── RULES ───────────────────────────────`,
+    `• Every tweet under 280 characters`,
+    `• Hook must stop the scroll in ≤5 words`,
+    `• Never open with "I" or the business name`,
+    mode === "tweet"
+      ? `• 3 variants with different angles (hot take / insight / story / question)`
+      : `• Thread structure: Hook → Body (numbered) → CTA`,
+  ].filter(Boolean).join("\n")
+  return lines
+}
+
 export default function XComposePage() {
   const { user, tokenBalance, refreshBalance } = useAuth()
   const router = useRouter()
@@ -130,12 +171,30 @@ export default function XComposePage() {
   const [mode, setMode] = useState<Mode>("tweet")
   const [topic, setTopic] = useState("")
   const [goal, setGoal] = useState<Goal>("Lead Generation")
+  const [tone, setTone] = useState<Tone>("Direct")
+  const [temperature, setTemperature] = useState(0.7)
+  const [masterPrompt, setMasterPrompt] = useState("")
   const [threadType, setThreadType] = useState<ThreadType>("Educational")
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showPromptPreview, setShowPromptPreview] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState("")
   const [tweetResults, setTweetResults] = useState<TweetVariant[]>([])
   const [threadResult, setThreadResult] = useState<ThreadResult | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  // Persist master prompt across sessions
+  useEffect(() => {
+    const saved = localStorage.getItem("x-master-prompt")
+    if (saved) setMasterPrompt(saved)
+  }, [])
+
+  const handleMasterPromptChange = (value: string) => {
+    setMasterPrompt(value)
+    localStorage.setItem("x-master-prompt", value)
+  }
+
+  const temperatureLabel = temperature <= 0.3 ? "Precise" : temperature <= 0.6 ? "Balanced" : temperature <= 0.85 ? "Creative" : "Wild"
 
   const handleGenerate = useCallback(async () => {
     if (!topic.trim()) {
@@ -161,7 +220,7 @@ export default function XComposePage() {
       const res = await fetch("/api/generate/x-post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, topic: topic.trim(), goal, threadType }),
+        body: JSON.stringify({ mode, topic: topic.trim(), goal, threadType, tone, temperature, masterPrompt }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -179,7 +238,7 @@ export default function XComposePage() {
     } finally {
       setGenerating(false)
     }
-  }, [topic, mode, goal, threadType, user, tokenBalance, refreshBalance, router])
+  }, [topic, mode, goal, threadType, tone, temperature, masterPrompt, user, tokenBalance, refreshBalance, router])
 
   const hasResults = tweetResults.length > 0 || threadResult !== null
 
@@ -314,6 +373,27 @@ export default function XComposePage() {
                 />
               </div>
 
+              {/* Tone of Voice */}
+              <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5">
+                <label className="block text-sm font-medium text-gray-400 mb-3">Tone of Voice</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {TONES.map((t) => (
+                    <button
+                      key={t.value}
+                      onClick={() => setTone(t.value)}
+                      className={`flex flex-col text-left px-3 py-2.5 rounded-xl border transition-all ${
+                        tone === t.value
+                          ? "border-teal-400/50 bg-teal-400/10"
+                          : "border-white/[0.08] hover:border-white/20"
+                      }`}
+                    >
+                      <span className={`text-xs font-semibold ${tone === t.value ? "text-teal-400" : "text-gray-300"}`}>{t.value}</span>
+                      <span className="text-[10px] text-gray-600 mt-0.5">{t.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Goal */}
               <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5">
                 <label className="block text-sm font-medium text-gray-400 mb-3">Goal</label>
@@ -356,6 +436,78 @@ export default function XComposePage() {
                 </div>
               )}
 
+              {/* Advanced Settings */}
+              <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/[0.02] transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                    <span className="text-sm font-medium text-gray-400">Advanced</span>
+                    {masterPrompt.trim() && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-400/10 text-teal-500 border border-teal-400/20">Active</span>
+                    )}
+                  </div>
+                  <svg className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${showAdvanced ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {showAdvanced && (
+                  <div className="px-5 pb-5 space-y-5 border-t border-white/[0.06] pt-4">
+
+                    {/* Temperature */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-xs font-medium text-gray-400">Temperature</label>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                            temperature <= 0.3 ? "bg-blue-500/10 text-blue-400" :
+                            temperature <= 0.6 ? "bg-teal-500/10 text-teal-400" :
+                            temperature <= 0.85 ? "bg-amber-500/10 text-amber-400" :
+                            "bg-red-500/10 text-red-400"
+                          }`}>{temperatureLabel}</span>
+                          <span className="text-xs text-gray-500 font-mono">{temperature.toFixed(2)}</span>
+                        </div>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={1}
+                        step={0.05}
+                        value={temperature}
+                        onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                        className="w-full h-1.5 rounded-full appearance-none bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-teal-400 [&::-webkit-slider-thumb]:cursor-pointer"
+                      />
+                      <div className="flex justify-between mt-1.5">
+                        <span className="text-[10px] text-gray-600">Precise / Consistent</span>
+                        <span className="text-[10px] text-gray-600">Creative / Varied</span>
+                      </div>
+                    </div>
+
+                    {/* Master Prompt */}
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">
+                        Master Prompt
+                      </label>
+                      <p className="text-[10px] text-gray-600 mb-2">Persistent rules applied to every generation. Use this to lock your writing style, handle, language, and constraints.</p>
+                      <textarea
+                        value={masterPrompt}
+                        onChange={(e) => handleMasterPromptChange(e.target.value)}
+                        rows={5}
+                        placeholder={`e.g. Always write in British English.\nMy Twitter handle is @yourhandle.\nNever use exclamation marks.\nAlways end with a question to drive replies.\nAvoid generic motivational phrases.`}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white placeholder-gray-700 focus:outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/20 transition-all resize-none text-xs leading-relaxed font-mono"
+                      />
+                      <p className="text-[10px] text-gray-600 mt-1.5">Saved to your browser automatically.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Generate */}
               <button
                 onClick={handleGenerate}
@@ -377,6 +529,26 @@ export default function XComposePage() {
                   </>
                 )}
               </button>
+
+              {/* Prompt Preview toggle */}
+              <button
+                onClick={() => setShowPromptPreview(!showPromptPreview)}
+                className="w-full text-xs text-gray-600 hover:text-gray-400 transition-colors py-1 flex items-center justify-center gap-1.5"
+              >
+                <svg className={`w-3 h-3 transition-transform duration-200 ${showPromptPreview ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+                {showPromptPreview ? "Hide" : "Preview"} master prompt
+              </button>
+
+              {showPromptPreview && (
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                  <p className="text-[10px] text-gray-600 mb-2 uppercase tracking-wider font-medium">Assembled Prompt</p>
+                  <pre className="text-[10px] text-gray-500 leading-relaxed whitespace-pre-wrap font-mono">
+                    {buildPromptPreview({ mode, topic, goal, tone, threadType, masterPrompt, temperature })}
+                  </pre>
+                </div>
+              )}
 
               {error && (
                 <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">

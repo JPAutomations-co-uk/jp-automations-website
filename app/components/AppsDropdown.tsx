@@ -35,6 +35,17 @@ const apps = [
     ),
   },
   {
+    href: "/apps/youtube-content",
+    name: "YouTube Content Engine",
+    desc: "Outliers, titles & research",
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 7.5A2.25 2.25 0 0 1 4.5 5.25h15A2.25 2.25 0 0 1 21.75 7.5v9a2.25 2.25 0 0 1-2.25 2.25h-15A2.25 2.25 0 0 1 2.25 16.5v-9Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="m10 9.75 4 2.25-4 2.25v-4.5Z" />
+      </svg>
+    ),
+  },
+  {
     href: "/apps/x-content",
     name: "X Content Engine",
     desc: "Threads, tweets & viral hooks",
@@ -132,38 +143,15 @@ export function AppsDropdown() {
   )
 }
 
-/** Mobile version — renders flat links for use inside a mobile menu */
+/** Mobile version — renders a single Apps link for use inside a mobile menu */
 export function AppsMobileLinks({ onClose }: { onClose: () => void }) {
   return (
-    <>
-      <a
-        href="/apps/instagram-content"
-        className="text-4xl font-bold text-gray-300 hover:text-teal-400 transition-colors"
-        onClick={onClose}
-      >
-        Instagram App
-      </a>
-      <a
-        href="/apps/linkedin-content"
-        className="text-4xl font-bold text-gray-300 hover:text-teal-400 transition-colors"
-        onClick={onClose}
-      >
-        LinkedIn App
-      </a>
-      <a
-        href="/apps/seo-blog"
-        className="text-4xl font-bold text-gray-300 hover:text-teal-400 transition-colors"
-        onClick={onClose}
-      >
-        SEO Blog App
-      </a>
-      <a
-        href="/apps/x-content"
-        className="text-4xl font-bold text-gray-300 hover:text-teal-400 transition-colors"
-        onClick={onClose}
-      >
-        X Content App
-      </a>
-    </>
+    <a
+      href="/dashboard"
+      className="text-4xl font-bold text-gray-300 hover:text-teal-400 transition-colors"
+      onClick={onClose}
+    >
+      Apps
+    </a>
   )
 }

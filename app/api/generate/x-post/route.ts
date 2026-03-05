@@ -21,6 +21,28 @@ const GOALS = [
   "Education & Authority",
 ] as const
 
+const TONES = [
+  "Direct",
+  "Casual",
+  "Bold",
+  "Witty",
+  "Educational",
+  "Inspirational",
+  "Story",
+  "Professional",
+] as const
+
+const TONE_DESCRIPTIONS: Record<string, string> = {
+  Direct: "Be sharp, confident, and brutally concise. Cut every word that doesn't earn its place.",
+  Casual: "Sound like a smart friend texting. Warm, relatable, no corporate-speak.",
+  Bold: "Make provocative claims. Challenge the status quo. Polarise — that's the point.",
+  Witty: "Be clever and punchy. Wordplay, unexpected angles, and dry humour are welcome.",
+  Educational: "Clear, structured, authoritative. Teach with precision — every point must land.",
+  Inspirational: "Energise and motivate. Make the reader feel capable and ready to act.",
+  Story: "Use narrative. 'I', 'my client', 'we'. Make it personal and immersive.",
+  Professional: "Polished and credible. Business-minded. No slang, no fluff, no hype.",
+}
+
 type ThreadType = (typeof THREAD_TYPES)[number]
 type Goal = (typeof GOALS)[number]
 type Mode = "tweet" | "thread"
@@ -53,14 +75,24 @@ function cleanText(value: unknown, maxLen: number): string {
     .slice(0, maxLen)
 }
 
+function cleanMultilineText(value: unknown, maxLen: number): string {
+  return String(value ?? "")
+    .trim()
+    .slice(0, maxLen)
+}
+
 type ProfileContext = {
   business_name?: string | null
   industry?: string | null
   target_audience?: string | null
-  brand_voice?: string | null
   tone?: string | null
   location?: string | null
   voice_sample?: string | null
+  offers?: string | null
+  usp?: string | null
+  primary_cta?: string | null
+  proof_points?: string | null
+  x_handle?: string | null
 }
 
 async function fetchProfileContext(
@@ -69,31 +101,42 @@ async function fetchProfileContext(
 ): Promise<ProfileContext> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("business_name, industry, target_audience, brand_voice, tone, location, voice_sample")
+    .select("business_name, industry, target_audience, tone, location, voice_sample, offers, usp, primary_cta, proof_points, x_handle")
     .eq("id", userId)
     .single()
   if (error) return {}
   return (data || {}) as ProfileContext
 }
 
-function buildTweetSystemPrompt(goal: Goal): string {
+function buildMasterPromptBlock(masterPrompt: string): string {
+  if (!masterPrompt.trim()) return ""
+  return `\nMASTER PROMPT (user-defined rules — follow these precisely above all else):
+${masterPrompt.trim()}
+`
+}
+
+function buildTweetSystemPrompt(goal: Goal, tone: string, masterPrompt: string): string {
+  const toneDesc = TONE_DESCRIPTIONS[tone] || TONE_DESCRIPTIONS.Direct
   return `You are an elite X (Twitter) strategist and copywriter. Your mission: write scroll-stopping tweets that serve the goal of "${goal}".
+
+TONE: ${tone} — ${toneDesc}
 
 Every tweet must:
 - Open with a hook that stops the scroll in the first 5 words
 - Never start with "I" or the business name
 - Stay under 280 characters (count carefully)
 - End with either a soft CTA, open loop, or engagement trigger
-
+- Fully embody the "${tone}" tone throughout${buildMasterPromptBlock(masterPrompt)}
 Output valid JSON only. No markdown fences. No commentary.`
 }
 
 function buildTweetPrompt(params: {
   topic: string
   goal: Goal
+  tone: string
   profile: ProfileContext
 }): string {
-  const { topic, goal, profile } = params
+  const { topic, goal, tone, profile } = params
 
   const goalCTAMap: Record<Goal, string> = {
     "Brand Awareness": "Follow for more / Repost if this resonates",
@@ -109,13 +152,17 @@ BUSINESS CONTEXT:
 - Business: ${profile.business_name || "Not provided"}
 - Industry: ${profile.industry || "Not provided"}
 - Audience: ${profile.target_audience || "Not provided"}
-- Brand Voice: ${profile.brand_voice || "Professional"}
-- Tone: ${profile.tone || "Direct"}
 - Location: ${profile.location || "UK"}
-- Voice Sample: ${profile.voice_sample || "Not provided — write in a direct, expert tone"}
+- X Handle: ${profile.x_handle || "Not provided"}
+- Offers: ${profile.offers || "Not provided"}
+- USP: ${profile.usp || "Not provided"}
+- Primary CTA: ${profile.primary_cta || "Not provided"}
+- Proof Points: ${profile.proof_points || "Not provided"}
+- Voice Sample: ${profile.voice_sample || "Not provided — write in the specified tone"}
 
 TOPIC: ${topic}
 GOAL: ${goal}
+TONE: ${tone}
 PREFERRED CTA STYLE: ${goalCTAMap[goal]}
 
 RULES:
@@ -123,7 +170,7 @@ RULES:
 2. Each tweet must take a completely different angle (hot take / story / list / question / insight)
 3. Never start with "I" or the business name
 4. Hook must be the first line — make it impossible to scroll past
-5. Match the brand voice and tone provided
+5. Every word must serve the "${tone}" tone
 
 Respond with valid JSON only:
 {
@@ -136,22 +183,24 @@ Respond with valid JSON only:
       "char_count": 142,
       "why_it_works": "one sentence explaining the mechanism"
     },
-    { ... },
-    { ... }
+    { "text": "...", "hook": "...", "angle": "...", "cta": "...", "char_count": 0, "why_it_works": "..." },
+    { "text": "...", "hook": "...", "angle": "...", "cta": "...", "char_count": 0, "why_it_works": "..." }
   ]
 }`
 }
 
-function buildThreadSystemPrompt(goal: Goal): string {
+function buildThreadSystemPrompt(goal: Goal, tone: string, masterPrompt: string): string {
+  const toneDesc = TONE_DESCRIPTIONS[tone] || TONE_DESCRIPTIONS.Direct
   return `You are an elite X (Twitter) thread writer. Your mission: write high-performing threads that serve the goal of "${goal}".
+
+TONE: ${tone} — ${toneDesc}
 
 Every thread must:
 - Open with a hook tweet that cannot be scrolled past
 - Deliver compounding value tweet by tweet
 - End with a strong CTA tweet that matches the goal
-- Use natural, conversational X writing style — not blog content
-- Each tweet must be under 280 characters
-
+- Fully embody the "${tone}" tone throughout — every single tweet
+- Each tweet must be under 280 characters${buildMasterPromptBlock(masterPrompt)}
 Output valid JSON only. No markdown fences. No commentary.`
 }
 
@@ -159,9 +208,10 @@ function buildThreadPrompt(params: {
   topic: string
   threadType: ThreadType
   goal: Goal
+  tone: string
   profile: ProfileContext
 }): string {
-  const { topic, threadType, goal, profile } = params
+  const { topic, threadType, goal, tone, profile } = params
 
   const threadStructures: Record<ThreadType, string> = {
     Educational: "Hook tweet → 6–10 value-packed insight tweets (numbered 1/ 2/ etc.) → Summary tweet → CTA tweet",
@@ -186,14 +236,18 @@ BUSINESS CONTEXT:
 - Business: ${profile.business_name || "Not provided"}
 - Industry: ${profile.industry || "Not provided"}
 - Audience: ${profile.target_audience || "Not provided"}
-- Brand Voice: ${profile.brand_voice || "Professional"}
-- Tone: ${profile.tone || "Direct"}
 - Location: ${profile.location || "UK"}
-- Voice Sample: ${profile.voice_sample || "Not provided — write in a direct, expert tone"}
+- X Handle: ${profile.x_handle || "Not provided"}
+- Offers: ${profile.offers || "Not provided"}
+- USP: ${profile.usp || "Not provided"}
+- Primary CTA: ${profile.primary_cta || "Not provided"}
+- Proof Points: ${profile.proof_points || "Not provided"}
+- Voice Sample: ${profile.voice_sample || "Not provided — write in the specified tone"}
 
 TOPIC: ${topic}
 THREAD TYPE: ${threadType}
 GOAL: ${goal}
+TONE: ${tone}
 STRUCTURE: ${threadStructures[threadType]}
 CTA STYLE: ${goalCTAMap[goal]}
 
@@ -203,7 +257,7 @@ RULES:
 3. Number the thread body tweets (1/ 2/ etc.) for clarity
 4. Avoid padding — every tweet must earn its place
 5. The final CTA tweet must match the goal directly
-6. Write in the brand voice and tone provided
+6. Every tweet must fully embody the "${tone}" tone
 7. Use natural X writing style — punchy, conversational, direct
 
 Respond with valid JSON only:
@@ -221,7 +275,6 @@ Respond with valid JSON only:
       "type": "body",
       "char_count": 210
     },
-    ...
     {
       "tweet_number": 8,
       "text": "cta tweet text",
@@ -286,6 +339,11 @@ export async function POST(request: NextRequest) {
     const threadType = THREAD_TYPES.includes(body.threadType as ThreadType)
       ? (body.threadType as ThreadType)
       : "Educational"
+    const tone = TONES.includes(body.tone as (typeof TONES)[number])
+      ? String(body.tone)
+      : "Direct"
+    const temperature = Math.min(1, Math.max(0, Number(body.temperature ?? 0.7)))
+    const masterPrompt = cleanMultilineText(body.masterPrompt, 2000)
 
     const tokenCost = TOKEN_COSTS[mode]
 
@@ -310,16 +368,18 @@ export async function POST(request: NextRequest) {
       const message = await getAnthropic().messages.create({
         model: "claude-sonnet-4-6",
         max_tokens: 2000,
-        system: buildTweetSystemPrompt(goal),
-        messages: [{ role: "user", content: buildTweetPrompt({ topic, goal, profile }) }],
+        temperature,
+        system: buildTweetSystemPrompt(goal, tone, masterPrompt),
+        messages: [{ role: "user", content: buildTweetPrompt({ topic, goal, tone, profile }) }],
       })
       responseText = message.content[0]?.type === "text" ? message.content[0].text : ""
     } else {
       const message = await getAnthropic().messages.create({
         model: "claude-sonnet-4-6",
         max_tokens: 4000,
-        system: buildThreadSystemPrompt(goal),
-        messages: [{ role: "user", content: buildThreadPrompt({ topic, threadType, goal, profile }) }],
+        temperature,
+        system: buildThreadSystemPrompt(goal, tone, masterPrompt),
+        messages: [{ role: "user", content: buildThreadPrompt({ topic, threadType, goal, tone, profile }) }],
       })
       responseText = message.content[0]?.type === "text" ? message.content[0].text : ""
     }

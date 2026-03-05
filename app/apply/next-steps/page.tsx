@@ -1,6 +1,16 @@
+import ConversionEvents from "@/app/components/ConversionEvents"
+
+export const metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
+
 export default function NextStepsPage() {
     return (
       <main className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black flex items-center justify-center px-6">
+      <ConversionEvents />
         <div className="max-w-xl w-full text-center bg-black/40 border border-white/10 rounded-3xl p-12 text-white">
   
           <h1 className="text-4xl font-bold mb-6">
@@ -28,7 +38,7 @@ export default function NextStepsPage() {
   
           <p className="text-gray-500 text-sm">
             Didn’t receive the email? Check your spam folder or contact us at{" "}
-            <span className="text-teal-400">support@yourdomain.com</span>
+            <span className="text-teal-400">jp@jpautomations.co.uk</span>
           </p>
   
         </div>

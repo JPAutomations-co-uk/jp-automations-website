@@ -119,6 +119,32 @@ export default function MorePageSections() {
   const [isSubmittingContact, setIsSubmittingContact] = useState(false)
   const [contactSuccess, setContactSuccess] = useState(false)
 
+  const dreamStates = [
+    "running without you",
+    "25+ hours reclaimed",
+    "leads on autopilot",
+    "scaling, no chaos",
+    "free of the bottleneck",
+    "follow-up on autopilot",
+    "growth without hiring",
+    "built to scale itself",
+    "runs like a machine",
+    "out of the weeds",
+  ]
+  const [dreamStateIndex, setDreamStateIndex] = useState(0)
+  const [dreamVisible, setDreamVisible] = useState(true)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setDreamVisible(false)
+      setTimeout(() => {
+        setDreamStateIndex(i => (i + 1) % dreamStates.length)
+        setDreamVisible(true)
+      }, 300)
+    }, 2600)
+    return () => clearInterval(timer)
+  }, [])
+
   const handleContactSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmittingContact(true)
@@ -153,26 +179,41 @@ export default function MorePageSections() {
   return (
     <div ref={containerRef}>
       <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.04] mix-blend-overlay" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')" }}></div>
-      {/* --- VSL SECTION --- */}
-      <section id="vsl" className="reveal-section relative z-10 py-32 md:py-40 px-6 border-t border-white/5">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 mb-6 tracking-tighter">
-            Watch How We Diagnose and Rebuild a <span className="text-teal-400">Service Business</span> in Under 90 Days
-          </h2>
-          <p className="text-xl md:text-2xl font-medium text-gray-400 max-w-3xl mx-auto mb-12">
-            This is what the audit process looks like. What we find. What we build. And how fast things change.
+      {/* --- HERO SECTION --- */}
+      <section className="relative z-10 pb-14 md:pb-20 pt-4 md:pt-8 px-4 md:px-6 text-center">
+        <div className="max-w-5xl mx-auto">
+          <p className="hero-eyebrow text-teal-400 text-xs font-mono uppercase tracking-[0.25em] mb-6">
+            For service business owners doing £250K+/year
           </p>
-
-          <div className="group relative w-full aspect-video rounded-2xl border border-teal-500/20 bg-black/60 shadow-[0_20px_80px_rgba(45,212,191,0.15)] flex items-center justify-center overflow-hidden hover:border-teal-500/40 transition-all duration-500 backdrop-blur-xl before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_center,rgba(45,212,191,0.1)_0,transparent_100%)]">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px] opacity-20" />
-            <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="flex flex-col items-center text-gray-500 z-10">
-              <div className="w-28 h-28 rounded-full border border-teal-500/30 bg-teal-500/5 flex items-center justify-center text-3xl text-teal-400 transition-all duration-300 group-hover:scale-110 animate-pulse-teal shadow-[0_0_30px_rgba(45,212,191,0.2)]">
-                ▶
-              </div>
-              <p className="mt-6 text-sm font-medium uppercase tracking-widest">Watch the full breakdown</p>
-            </div>
-          </div>
+          <h1
+            className="hero-heading font-extrabold text-white tracking-tight leading-[1.1] mb-6"
+            style={{ fontSize: "clamp(1.5rem, 6.5vw, 5rem)" }}
+          >
+            Your business,<br />
+            <span
+              className="text-teal-400 inline-block"
+              style={{
+                whiteSpace: "nowrap",
+                opacity: dreamVisible ? 1 : 0,
+                filter: dreamVisible ? "blur(0px)" : "blur(10px)",
+                transform: dreamVisible ? "translateY(0px) scale(1)" : "translateY(5px) scale(0.97)",
+                transition: dreamVisible
+                  ? "opacity 0.45s ease, filter 0.5s ease, transform 0.45s ease"
+                  : "opacity 0.18s ease, filter 0.18s ease, transform 0.18s ease",
+              }}
+            >
+              {dreamStates[dreamStateIndex]}
+            </span>
+          </h1>
+          <p className="hero-sub text-base md:text-xl text-gray-400 leading-relaxed mb-8">
+            More revenue, recovered from what&apos;s currently slipping through the gaps. More time, freed from the admin that shouldn&apos;t need you. The kind of freedom that comes when your business is finally built to run without you.
+          </p>
+          <a
+            href="/apply"
+            className="hero-cta inline-flex items-center gap-2 px-7 py-4 bg-teal-400 text-black rounded-xl font-semibold text-base hover:bg-teal-300 transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(45,212,191,0.3)]"
+          >
+            Book a Free Call <span>→</span>
+          </a>
         </div>
       </section>
 
@@ -317,6 +358,29 @@ export default function MorePageSections() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- VSL SECTION --- */}
+      <section id="vsl" className="reveal-section relative z-10 py-24 md:py-32 px-6 border-t border-white/5">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 mb-6 tracking-tighter">
+            Watch How We Diagnose and Rebuild a <span className="text-teal-400">Service Business</span> in Under 90 Days
+          </h2>
+          <p className="text-xl md:text-2xl font-medium text-gray-400 max-w-3xl mx-auto mb-12">
+            This is what the audit process looks like. What we find. What we build. And how fast things change.
+          </p>
+
+          <div className="group relative w-full aspect-video rounded-2xl border border-teal-500/20 bg-black/60 shadow-[0_20px_80px_rgba(45,212,191,0.15)] flex items-center justify-center overflow-hidden hover:border-teal-500/40 transition-all duration-500 backdrop-blur-xl before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_center,rgba(45,212,191,0.1)_0,transparent_100%)]">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px] opacity-20" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex flex-col items-center text-gray-500 z-10">
+              <div className="w-28 h-28 rounded-full border border-teal-500/30 bg-teal-500/5 flex items-center justify-center text-3xl text-teal-400 transition-all duration-300 group-hover:scale-110 animate-pulse-teal shadow-[0_0_30px_rgba(45,212,191,0.2)]">
+                ▶
+              </div>
+              <p className="mt-6 text-sm font-medium uppercase tracking-widest">Watch the full breakdown</p>
             </div>
           </div>
         </div>
@@ -532,28 +596,28 @@ export default function MorePageSections() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
-                title: "Setting Up Your IDE Properly, From Scratch",
-                excerpt: "The complete VS Code and Cursor setup — secrets protection, commit signing, linting, TypeScript strict mode, pre-commit hooks, and AI configuration.",
-                slug: "/blog/setup-your-ide-properly",
-                image: "/blog/IDE.jpg"
-              },
-              {
-                title: "The Biggest Automation Mistakes Service Businesses Make",
-                excerpt: "Why most automation projects fail, and how service businesses should actually approach AI automation.",
-                slug: "/blog/biggest-automation-mistakes-service-businesses",
-                image: "/blog/automation-mistakes-service-businesses.jpg"
-              },
-              {
-                title: "Case Study: Invoicing System",
-                excerpt: "How this roofing business saves 25 hours/week & recovered £2,995 in revenue",
-                slug: "/blog/invoice-case-study",
-                image: "/blog/case-study-invoice.jpg"
+                title: "5 Business Processes Every UK Service Business Should Automate",
+                excerpt: "The five processes quietly draining time and revenue every week — and how to automate each one for immediate, measurable impact.",
+                slug: "/blog/business-process-automation-uk-service-businesses",
+                image: "/blog/business-process-automation.webp"
               },
               {
                 title: "How to Automate Client Follow-Up for UK Service Businesses (Without a CRM)",
                 excerpt: "Most service businesses lose leads not because of bad pricing — but because follow-up is slow or inconsistent. Here's how to fix it.",
                 slug: "/blog/automate-client-follow-up-uk-service-businesses",
-                image: "/blog/follow-up.jpg"
+                image: "/blog/follow-up.webp"
+              },
+              {
+                title: "Case Study: Invoicing System",
+                excerpt: "How this roofing business saves 25 hours/week & recovered £2,995 in revenue",
+                slug: "/blog/invoice-case-study",
+                image: "/blog/case-study-invoice.webp"
+              },
+              {
+                title: "The Biggest Automation Mistakes Service Businesses Make",
+                excerpt: "Why most automation projects fail, and how service businesses should actually approach AI automation.",
+                slug: "/blog/biggest-automation-mistakes-service-businesses",
+                image: "/blog/automation-mistakes-service-businesses.webp"
               }
             ].map((post) => (
               <a key={post.slug} href={post.slug} className="group block rounded-2xl overflow-hidden bg-white/[0.02] border border-white/5 hover:border-teal-500/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(45,212,191,0.1)]">
@@ -767,6 +831,36 @@ export default function MorePageSections() {
       </section>
 
       <style jsx>{`
+  @keyframes hero-in {
+    from {
+      opacity: 0;
+      filter: blur(12px);
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+  }
+
+  .hero-eyebrow {
+    animation: hero-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 0.05s;
+  }
+  .hero-heading {
+    animation: hero-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 0.18s;
+  }
+  .hero-sub {
+    animation: hero-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 0.32s;
+  }
+  .hero-cta {
+    animation: hero-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 0.46s;
+  }
+
   @keyframes marquee-scroll {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }

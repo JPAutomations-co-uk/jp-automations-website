@@ -100,10 +100,14 @@ type ProfileContext = {
   business_name?: string | null
   industry?: string | null
   target_audience?: string | null
-  brand_voice?: string | null
   tone?: string | null
   location?: string | null
   voice_sample?: string | null
+  offers?: string | null
+  usp?: string | null
+  primary_cta?: string | null
+  proof_points?: string | null
+  x_handle?: string | null
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -278,7 +282,7 @@ async function fetchProfileContext(
 ): Promise<ProfileContext> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("business_name, industry, target_audience, brand_voice, tone, location, voice_sample")
+    .select("business_name, industry, target_audience, tone, location, voice_sample, offers, usp, primary_cta, proof_points, x_handle")
     .eq("id", userId)
     .single()
   if (error) return {}
@@ -352,7 +356,7 @@ function buildGenerationPrompt(params: {
   businessDescription: string
   targetAudience: string
   qualityMode: QualityMode
-  voiceContext: { brandVoice: string; tone: string; voiceSample: string; businessName: string; location: string }
+  voiceContext: { tone: string; voiceSample: string; businessName: string; location: string; offers: string; usp: string; primaryCta: string; proofPoints: string; xHandle: string }
   slots: SlotBlueprint[]
   repairDirectives: string[]
 }): string {
@@ -374,10 +378,14 @@ GOAL STRATEGY — EVERY POST MUST SERVE THIS:
 ${goalTactics}
 
 VOICE LOCK:
-- Brand Voice: ${voiceContext.brandVoice || "Professional"}
 - Tone: ${voiceContext.tone || "Direct"}
 - Business Name: ${voiceContext.businessName || "Business"}
 - Location: ${voiceContext.location || "UK"}
+- X Handle: ${voiceContext.xHandle || "Not provided"}
+- Offers: ${voiceContext.offers || "Not provided"}
+- USP: ${voiceContext.usp || "Not provided"}
+- Primary CTA: ${voiceContext.primaryCta || "Not provided"}
+- Proof Points: ${voiceContext.proofPoints || "Not provided"}
 - Voice Sample: ${voiceContext.voiceSample || "Not provided — write in a direct, expert tone"}
 
 SLOT BLUEPRINTS (keep date, dayOfWeek, funnel_stage, pillar, format, post_type, primary_kpi EXACTLY as given):
@@ -491,7 +499,7 @@ function normaliseGeneratedPlan(params: {
 async function generateCandidate(params: {
   month: string; postsPerWeek: number; goal: string; industry: string
   businessDescription: string; targetAudience: string; qualityMode: QualityMode
-  voiceContext: { brandVoice: string; tone: string; voiceSample: string; businessName: string; location: string }
+  voiceContext: { tone: string; voiceSample: string; businessName: string; location: string; offers: string; usp: string; primaryCta: string; proofPoints: string; xHandle: string }
   slots: SlotBlueprint[]; repairDirectives: string[]
 }): Promise<GeneratedPlan | null> {
   const message = await getAnthropic().messages.create({
@@ -574,11 +582,15 @@ export async function POST(request: NextRequest) {
 
     const profile = await fetchProfileContext(supabase, user.id)
     const voiceContext = {
-      brandVoice: cleanText(profile?.brand_voice, 200),
       tone: cleanText(profile?.tone, 120),
       voiceSample: cleanText(profile?.voice_sample, 2500),
       businessName: cleanText(profile?.business_name, 120),
       location: cleanText(profile?.location, 120),
+      offers: cleanText(profile?.offers, 500),
+      usp: cleanText(profile?.usp, 300),
+      primaryCta: cleanText(profile?.primary_cta, 150),
+      proofPoints: cleanText(profile?.proof_points, 400),
+      xHandle: cleanText(profile?.x_handle, 50),
     }
 
     const maxAttempts = MAX_ATTEMPTS[qualityMode]

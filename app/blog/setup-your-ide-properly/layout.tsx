@@ -1,9 +1,13 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Setting Up Your IDE Properly, From Scratch | JP Automations",
+  title: "Setting Up Your IDE Properly, From Scratch",
   description:
     "The complete VS Code and Cursor setup guide — secrets protection, commit signing, auto-formatting, linting, TypeScript strict mode, pre-commit hooks, and AI configuration. Everything you need, nothing you don't.",
+  robots: {
+    index: false,
+    follow: false,
+  },
   alternates: {
     canonical: "https://www.jpautomations.co.uk/blog/setup-your-ide-properly",
   },

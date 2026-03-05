@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import AiNewsFilterApp from "./AiNewsFilterApp"
+import WaitlistCTA from "@/app/components/WaitlistCTA"
 
 export const metadata: Metadata = {
   title: "AI News Filter — Get a Weekly AI Brief Built Around Your Work",
@@ -127,10 +127,10 @@ export default function AiNewsFilterPage() {
               Pricing
             </a>
             <a
-              href="/apply"
+              href="#waitlist"
               className="px-5 py-2.5 text-sm font-semibold bg-teal-400 text-black rounded-lg hover:bg-teal-300 transition-all hover:scale-105"
             >
-              Book a Call →
+              Join Waitlist
             </a>
           </div>
         </div>
@@ -152,13 +152,10 @@ export default function AiNewsFilterPage() {
             Every week, dozens of AI tools release updates. Most of them don't affect you.
             This filter reads everything and surfaces only what matters for how you actually work.
           </p>
-          <a
-            href="#configurator"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-teal-400 text-black font-semibold rounded-xl hover:bg-teal-300 transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(45,212,191,0.4)]"
-          >
-            Build my brief ↓
-          </a>
-          <p className="text-gray-600 text-sm mt-4">Free · No account required · Powered by Claude</p>
+          <div id="waitlist">
+            <WaitlistCTA />
+          </div>
+          <p className="text-gray-600 text-sm mt-4">Join the waitlist · Early access coming soon</p>
         </section>
 
         {/* How it works — horizontal timeline */}
@@ -196,9 +193,6 @@ export default function AiNewsFilterPage() {
           </div>
         </section>
 
-        {/* Interactive configurator */}
-        <AiNewsFilterApp />
-
         {/* CTA */}
         <section className="px-6 pb-24">
           <div className="max-w-2xl mx-auto bg-gradient-to-br from-teal-400/10 via-teal-400/5 to-transparent border border-teal-400/20 rounded-2xl p-10 md:p-14 text-center">
@@ -206,14 +200,9 @@ export default function AiNewsFilterPage() {
               Want this running every Sunday automatically?
             </h2>
             <p className="text-gray-400 mb-8 leading-relaxed">
-              The full workflow runs on n8n — pulling your sources, filtering through Claude, and delivering your brief before Monday morning. We set it up for you.
+              We&apos;re opening early access soon. Join the waitlist and be first in line.
             </p>
-            <a
-              href="/apply"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-teal-400 text-black font-semibold rounded-xl hover:bg-teal-300 transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(45,212,191,0.4)]"
-            >
-              Book a call →
-            </a>
+            <WaitlistCTA />
           </div>
         </section>
 

@@ -21,24 +21,31 @@ export const metadata: Metadata = {
       },
     ],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog — AI Automation Guides & Case Studies",
+    description:
+      "Free guides and case studies for UK service businesses. AI automation tips that save time and recover revenue.",
+    images: ["https://www.jpautomations.co.uk/og-image.png"],
+  },
 }
 
 export default function BlogIndexPage() {
   const posts = [
     {
-      title: "Setting Up Your IDE Properly, From Scratch",
+      title: "5 Business Processes Every UK Service Business Should Automate",
       excerpt:
-        "Most developers open VS Code, install a dark theme, and think they're done. This is the complete setup — secrets protection, git signing, linting, TypeScript strict mode, pre-commit hooks, and AI configuration.",
-      slug: "/setup-your-ide-properly",
-      image: "/blog/IDE.jpg",
-      date: "4 March 2026",
+        "The five processes quietly draining time and revenue every week — and how to automate each one for immediate, measurable impact.",
+      slug: "/business-process-automation-uk-service-businesses",
+      image: "/blog/business-process-automation.webp",
+      date: "5 March 2026",
     },
     {
       title: "How to Automate Client Follow-Up for UK Service Businesses (Without a CRM)",
       excerpt:
         "Most service businesses lose leads not because of bad pricing — but because follow-up is slow or inconsistent. Here's how to fix it automatically.",
       slug: "/automate-client-follow-up-uk-service-businesses",
-      image: "/blog/follow-up.jpg",
+      image: "/blog/follow-up.webp",
       date: "2 March 2026",
     },
     {
@@ -46,7 +53,7 @@ export default function BlogIndexPage() {
       excerpt:
         "How a simple invoicing automation eliminated admin and stabilised cash flow for a roofing contractor.",
       slug: "/invoice-case-study",
-      image: "/blog/case-study-invoice.jpg",
+      image: "/blog/case-study-invoice.webp",
       date: "January 2026",
     },
     {
@@ -54,7 +61,7 @@ export default function BlogIndexPage() {
       excerpt:
         "Why most automation projects fail — and how service businesses should actually approach AI automation.",
       slug: "/biggest-automation-mistakes-service-businesses",
-      image: "/blog/automation-mistakes-service-businesses.jpg",
+      image: "/blog/automation-mistakes-service-businesses.webp",
       date: "24 January 2026",
     },
     {
@@ -62,7 +69,7 @@ export default function BlogIndexPage() {
       excerpt:
         "If your business feels stuck, these are the systems likely holding you back.",
       slug: "/essential-business-systems",
-      image: "/blog/business-systems.jpg",
+      image: "/blog/business-systems.webp",
       date: "January 2026",
     },
   ]
@@ -80,7 +87,7 @@ export default function BlogIndexPage() {
         </a>
 
         <h1 className="text-9xl font-bold text-white text-center">
-          The <span className="text-teal-400">Blog</span>
+          The <span className="text-teal-400">AI Automation</span> Blog
         </h1>
         <p className="mt-6 text-lg text-gray-300 text-center max-w-3xl mx-auto">
           Free resources, insights, and practical tips designed to help trade businesses grow to their full potential using smart digital systems.

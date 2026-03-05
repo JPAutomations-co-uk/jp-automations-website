@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Pricing — AI Instagram & SEO Tools for Small Businesses",
+  title: "Pricing — AI Content Tools",
   description:
-    "Pay-as-you-go AI content tools for small businesses. Instagram reels, carousels, SEO blog posts, and keyword research. From £0.50/token. Bundles from £20. Tokens never expire.",
+    "Pay-as-you-go AI content tools for UK service businesses. Instagram reels, carousels, SEO blog posts, and LinkedIn content. Tokens from £20, never expire.",
   alternates: {
     canonical: "https://www.jpautomations.co.uk/pricing",
   },
@@ -20,6 +20,13 @@ export const metadata: Metadata = {
         alt: "JP Automations Pricing — AI Content Tools",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pricing — AI Content Tools",
+    description:
+      "Pay-as-you-go AI content tools for UK service businesses. Tokens from £20, never expire.",
+    images: ["https://www.jpautomations.co.uk/api/og?title=Pricing+%E2%80%94+AI+Content+Tools&subtitle=JP+Automations"],
   },
 }
 

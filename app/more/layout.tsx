@@ -100,6 +100,13 @@ export const metadata: Metadata = {
       },
     ],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Client Results & Case Studies",
+    description:
+      "25+ hours reclaimed weekly. £10k+ recovered in month one. Real results from UK service businesses.",
+    images: ["https://www.jpautomations.co.uk/api/og?title=Client+Results+%26+Case+Studies&subtitle=JP+Automations"],
+  },
 }
 
 export default function MoreLayout({ children }: { children: React.ReactNode }) {

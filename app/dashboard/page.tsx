@@ -31,6 +31,14 @@ const apps = [
     href: "/dashboard/seo-blog",
   },
   {
+    name: "YouTube Content Engine",
+    description:
+      "Find outlier YouTube videos in your niche, analyze why they perform, and generate title variants directly into your research sheet.",
+    videoId: "",
+    status: "live" as const,
+    href: "/dashboard/youtube",
+  },
+  {
     name: "X Content Engine",
     description:
       "Goal-based monthly content plans, tweet and thread writing, and a tiered account strategy — all X-native. Threads, single tweets, and polls built around your growth goal. No Instagram formats.",

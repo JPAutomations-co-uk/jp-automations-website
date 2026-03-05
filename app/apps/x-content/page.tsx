@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import WaitlistCTA from "@/app/components/WaitlistCTA"
 
 export const metadata: Metadata = {
   title: "AI X Content Engine — Grow Faster on X (Twitter)",
@@ -159,10 +160,10 @@ export default function XContentPage() {
             <a href="/apps/seo-blog" className="text-sm text-gray-400 hover:text-white transition-colors hidden md:block">SEO Blog Writer</a>
             <a href="/pricing" className="text-sm text-gray-400 hover:text-white transition-colors hidden md:block">Pricing</a>
             <a
-              href="/dashboard/x"
+              href="#waitlist"
               className="px-5 py-2.5 text-sm font-semibold bg-teal-400 text-black rounded-lg hover:bg-teal-300 transition-all hover:scale-105"
             >
-              Open App →
+              Join Waitlist
             </a>
           </div>
         </div>
@@ -184,21 +185,10 @@ export default function XContentPage() {
             Goal-based content plans, thread writing, and the exact accounts to engage with.
             Everything is X-native — built for the algorithm, not repurposed from Instagram.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/dashboard/x"
-              className="px-8 py-4 bg-teal-400 text-black font-semibold rounded-xl hover:bg-teal-300 transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(45,212,191,0.4)]"
-            >
-              Start generating — from £1
-            </a>
-            <a
-              href="/pricing"
-              className="px-8 py-4 bg-white/[0.04] border border-white/10 text-white font-semibold rounded-xl hover:border-teal-400/40 hover:bg-white/[0.08] transition-all"
-            >
-              See all token prices
-            </a>
+          <div id="waitlist">
+            <WaitlistCTA />
           </div>
-          <p className="text-gray-600 text-sm mt-4">Tokens never expire · Works across all apps · No commitment</p>
+          <p className="text-gray-600 text-sm mt-4">Join the waitlist · Early access coming soon</p>
         </section>
 
         {/* Features */}
@@ -327,14 +317,9 @@ export default function XContentPage() {
           <div className="max-w-2xl mx-auto bg-gradient-to-br from-teal-400/10 via-teal-400/5 to-transparent border border-teal-400/20 rounded-2xl p-10 md:p-14 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to stop guessing on X?</h2>
             <p className="text-gray-400 mb-8 leading-relaxed">
-              Start with 50 tokens for £20 — enough for 6 threads, a full month plan, and your account strategy.
+              We&apos;re opening early access soon. Join the waitlist and be first in line.
             </p>
-            <a
-              href="/dashboard/x"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-teal-400 text-black font-semibold rounded-xl hover:bg-teal-300 transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(45,212,191,0.4)]"
-            >
-              Open the app →
-            </a>
+            <WaitlistCTA />
           </div>
         </section>
 

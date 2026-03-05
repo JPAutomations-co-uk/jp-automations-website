@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation";
 import { useForm } from "@/app/components/FormContext";
 import { useState } from "react";
 
+// 👇 PASTE YOUR GOOGLE SCRIPT WEB APP URL HERE
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyF_Jnx4K0k9fDgar4b0p9OcCYbSuFkWVIbYrUF2LD2RtOR7VFNO-obfy1U7en_w6dC/exec"; 
+
 export default function SubmitPage() {
   const router = useRouter();
   const { data } = useForm();
@@ -15,6 +18,7 @@ export default function SubmitPage() {
     setError("");
 
     try {
+      // Point to YOUR Next.js API route
       const response = await fetch("/api/submit-booking", {
         method: "POST",
         headers: {
@@ -27,11 +31,10 @@ export default function SubmitPage() {
         throw new Error("Failed to submit form");
       }
 
-      // Redirect to success page
       router.push("/apply/next-steps");
     } catch (err) {
       console.error("Submission error:", err);
-      setError("Something went wrong. Please try again or contact us directly.");
+      setError("Something went wrong.");
       setIsSubmitting(false);
     }
   };

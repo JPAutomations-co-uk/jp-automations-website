@@ -53,8 +53,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${base}/blog/setup-your-ide-properly`,
-      lastModified: new Date("2026-03-04"),
+      url: `${base}/blog/business-process-automation-uk-service-businesses`,
+      lastModified: new Date("2026-03-05"),
       changeFrequency: "monthly",
       priority: 0.8,
     },
@@ -122,6 +122,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${base}/client-folder-guide`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${base}/free-resources`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${base}/free-openclaw`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${base}/openclaw-guide`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.5,
