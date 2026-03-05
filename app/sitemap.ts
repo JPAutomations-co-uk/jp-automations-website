@@ -82,6 +82,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    {
+      url: `${base}/blog/setup-your-ide-properly`,
+      lastModified: new Date("2026-03-04"),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
 
     // Lead magnet landing pages (publicly discoverable)
     {
@@ -146,6 +152,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
 
     // Apps (public-facing pages)
+    {
+      url: `${base}/apps/ai-news-filter`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
     {
       url: `${base}/apps/instagram-content`,
       lastModified: now,
