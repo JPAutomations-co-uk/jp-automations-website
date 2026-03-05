@@ -14,11 +14,11 @@ export async function POST(request: NextRequest) {
   try {
     const { name, email, source } = await request.json()
 
-    if (!name || !email) {
-      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 })
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    const firstName = name.split(' ')[0]
+    const firstName = name ? name.split(' ')[0] : email.split('@')[0]
     const optinSource = source === 'x' ? 'newsletter-x' : 'newsletter-popup'
 
     // Log to Google Sheet
