@@ -2,16 +2,16 @@ import type { Metadata } from "next"
 import InstaEngineClient from "./InstaEngineClient"
 
 export const metadata: Metadata = {
-  title: "InstaEngine — AI Instagram Content Generator | Reels, Carousels & Captions in Seconds",
+  title: "Instagram Content Engine — AI Reels, Carousels & Captions in Seconds | JP Automations",
   description:
-    "Generate scroll-stopping Instagram reels, carousels, images, captions, and content plans with AI. One-time $97 investment, lifetime access. No subscription. Setup in 15 minutes.",
+    "AI-powered Instagram reels, carousels, images, captions, and content plans for service businesses. Pay-as-you-go from £0.50/token — no monthly subscription. Generated in seconds.",
   alternates: {
     canonical: "https://www.jpautomations.co.uk/apps/instagram-content",
   },
   openGraph: {
-    title: "InstaEngine — AI Instagram Content Generator",
+    title: "Instagram Content Engine — AI Content Generated in Seconds",
     description:
-      "Stop the chaos. Start the engine. AI-powered Instagram reels, carousels, captions, and content plans — generated in seconds. One-time investment from $97. No subscription.",
+      "AI-powered reels, carousels, images, captions & content plans for any business. Pay per use from £0.50/token. No subscription. By JP Automations.",
     url: "https://www.jpautomations.co.uk/apps/instagram-content",
     siteName: "JP Automations",
     locale: "en_GB",
@@ -21,15 +21,15 @@ export const metadata: Metadata = {
         url: "https://www.jpautomations.co.uk/og-image.png",
         width: 1200,
         height: 630,
-        alt: "InstaEngine — AI Instagram Content Generator by JP Automations",
+        alt: "Instagram Content Engine — AI Instagram Content by JP Automations",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "InstaEngine — AI Instagram Content Generated in Seconds",
+    title: "Instagram Content Engine — AI Content Generated in Seconds",
     description:
-      "AI-powered reels, carousels, captions & content plans. One-time $97 investment. No subscription. By JP Automations.",
+      "AI-powered reels, carousels, captions & content plans. Pay-as-you-go from £0.50/token. No subscription. By JP Automations.",
     images: ["https://www.jpautomations.co.uk/og-image.png"],
   },
   robots: {
@@ -41,17 +41,19 @@ export const metadata: Metadata = {
 const softwareApplicationSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "InstaEngine",
+  name: "Instagram Content Engine",
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description:
-    "AI-powered Instagram content engine — reels, carousels, single images, captions, content plans, and ad creatives. One-time investment for lifetime access.",
+    "AI-powered Instagram content engine — reels, carousels, single images, captions, content plans, and ad creatives. Token-based pay-as-you-go pricing with no monthly subscription.",
   url: "https://www.jpautomations.co.uk/apps/instagram-content",
   offers: {
-    "@type": "Offer",
-    price: "97",
-    priceCurrency: "USD",
-    description: "One-time investment starting at $97 for lifetime access.",
+    "@type": "AggregateOffer",
+    lowPrice: "0.50",
+    highPrice: "110",
+    priceCurrency: "GBP",
+    offerCount: "3",
+    description: "Pay-as-you-go from £0.50/token or Pro Bundle 350 tokens for £110.",
   },
   provider: {
     "@type": "Organization",
@@ -66,42 +68,50 @@ const faqSchema = {
   mainEntity: [
     {
       "@type": "Question",
-      name: "What is InstaEngine?",
+      name: "Do I need design experience?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "A comprehensive operating system built on Notion/Airtable designed to automate your entire content pipeline.",
+        text: "No. The entire process is prompt-based. Describe what you want in plain English and the AI generates the content.",
       },
     },
     {
       "@type": "Question",
-      name: "Do I need coding experience?",
+      name: "What aspect ratios are supported?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Zero. If you can drag and drop, you can run the Engine.",
+        text: "Square (1:1), portrait (4:5), story/reel (9:16), and landscape (16:9) — all standard Instagram formats.",
       },
     },
     {
       "@type": "Question",
-      name: "How long does setup take?",
+      name: "Can I use my own brand colours and style?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Under 15 minutes. You'll be generating ready-to-post content on day one.",
+        text: "Yes. During onboarding you define your brand style, and all generated content will reflect it consistently.",
       },
     },
     {
       "@type": "Question",
-      name: "Is this a subscription?",
+      name: "How long does generation take?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "No. It is a one-time investment for lifetime access to the core engine.",
+        text: "Single images take 10–20 seconds. 7-slide carousels take 30–60 seconds. Reels take 1–2 minutes.",
       },
     },
     {
       "@type": "Question",
-      name: "Does it work for my niche?",
+      name: "Do tokens expire?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes. The frameworks are industry-agnostic and adapt to your unique voice.",
+        text: "No. Tokens never expire and work across all apps — Instagram, SEO Blog, and every new app we release.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Is this a monthly subscription?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "No. You buy tokens when you need them. Pay-as-you-go at £0.50/token, or save with a bundle. No contracts, no commitments.",
       },
     },
   ],

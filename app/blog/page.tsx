@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import BlogListClient from "./BlogListClient"
 
 export const metadata: Metadata = {
   title: "Blog — AI Automation Guides & Case Studies",
@@ -30,98 +31,57 @@ export const metadata: Metadata = {
   },
 }
 
+const posts = [
+  {
+    title: "How to Actually Use AI — 99% of People Are Doing This Wrong",
+    excerpt:
+      "Vague prompts get vague outputs. Learn the four-layer prompt framework, iteration techniques, and how to pick the right AI model for every task.",
+    slug: "/how-to-use-ai-effectively",
+    image: "/blog/llm.jpg",
+    date: "7 March 2026",
+  },
+  {
+    title: "5 Business Processes Every UK Service Business Should Automate",
+    excerpt:
+      "The five processes quietly draining time and revenue every week — and how to automate each one for immediate, measurable impact.",
+    slug: "/business-process-automation-uk-service-businesses",
+    image: "/blog/business-process-automation.webp",
+    date: "5 March 2026",
+  },
+  {
+    title: "How to Automate Client Follow-Up for UK Service Businesses (Without a CRM)",
+    excerpt:
+      "Most service businesses lose leads not because of bad pricing — but because follow-up is slow or inconsistent. Here's how to fix it automatically.",
+    slug: "/automate-client-follow-up-uk-service-businesses",
+    image: "/blog/follow-up.webp",
+    date: "2 March 2026",
+  },
+  {
+    title: "Case Study: 25 Hours Reclaimed, Four Figures Recovered",
+    excerpt:
+      "How a simple invoicing automation eliminated admin and stabilised cash flow for a roofing contractor.",
+    slug: "/invoice-case-study",
+    image: "/blog/case-study-invoice.webp",
+    date: "January 2026",
+  },
+  {
+    title: "The Biggest Automation Mistakes Service Businesses Make",
+    excerpt:
+      "Why most automation projects fail — and how service businesses should actually approach AI automation.",
+    slug: "/biggest-automation-mistakes-service-businesses",
+    image: "/blog/automation-mistakes-service-businesses.webp",
+    date: "24 January 2026",
+  },
+  {
+    title: "The 3 Systems Every Scalable Business Needs",
+    excerpt:
+      "If your business feels stuck, these are the systems likely holding you back.",
+    slug: "/essential-business-systems",
+    image: "/blog/business-systems.webp",
+    date: "January 2026",
+  },
+]
+
 export default function BlogIndexPage() {
-  const posts = [
-    {
-      title: "5 Business Processes Every UK Service Business Should Automate",
-      excerpt:
-        "The five processes quietly draining time and revenue every week — and how to automate each one for immediate, measurable impact.",
-      slug: "/business-process-automation-uk-service-businesses",
-      image: "/blog/business-process-automation.webp",
-      date: "5 March 2026",
-    },
-    {
-      title: "How to Automate Client Follow-Up for UK Service Businesses (Without a CRM)",
-      excerpt:
-        "Most service businesses lose leads not because of bad pricing — but because follow-up is slow or inconsistent. Here's how to fix it automatically.",
-      slug: "/automate-client-follow-up-uk-service-businesses",
-      image: "/blog/follow-up.webp",
-      date: "2 March 2026",
-    },
-    {
-      title: "Case Study: 25 Hours Reclaimed, Four Figures Recovered",
-      excerpt:
-        "How a simple invoicing automation eliminated admin and stabilised cash flow for a roofing contractor.",
-      slug: "/invoice-case-study",
-      image: "/blog/case-study-invoice.webp",
-      date: "January 2026",
-    },
-    {
-      title: "The Biggest Automation Mistakes Service Businesses Make",
-      excerpt:
-        "Why most automation projects fail — and how service businesses should actually approach AI automation.",
-      slug: "/biggest-automation-mistakes-service-businesses",
-      image: "/blog/automation-mistakes-service-businesses.webp",
-      date: "24 January 2026",
-    },
-    {
-      title: "The 3 Systems Every Scalable Business Needs",
-      excerpt:
-        "If your business feels stuck, these are the systems likely holding you back.",
-      slug: "/essential-business-systems",
-      image: "/blog/business-systems.webp",
-      date: "January 2026",
-    },
-  ]
-
-
-  return (
-    <main className="bg-black min-h-screen py-24">
-      <div className="max-w-7xl mx-auto px-6">
-        <a
-          href="/"
-          className="inline-flex items-center gap-2 mb-12 text-sm font-medium text-gray-400 hover:text-teal-400 transition-colors"
-        >
-          <span className="transition-transform group-hover:-translate-x-1">←</span>
-          Back to home
-        </a>
-
-        <h1 className="text-9xl font-bold text-white text-center">
-          The <span className="text-teal-400">AI Automation</span> Blog
-        </h1>
-        <p className="mt-6 text-lg text-gray-300 text-center max-w-3xl mx-auto">
-          Free resources, insights, and practical tips designed to help trade businesses grow to their full potential using smart digital systems.
-        </p>
-
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-10">
-          {posts.map((post) => (
-            <a
-              key={post.slug}
-              href={`/blog${post.slug}`}
-              className="group rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 hover:border-teal-400 transition"
-            >
-              <div className="aspect-[16/10] overflow-hidden">
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
-              </div>
-
-              <div className="p-8">
-                <p className="text-xs text-gray-500 mb-2">{post.date}</p>
-                <h2 className="text-2xl font-semibold text-white group-hover:text-teal-400">
-                  {post.title}
-                </h2>
-                <p className="mt-4 text-gray-400">
-                  {post.excerpt}
-                </p>
-              </div>
-            </a>
-          ))}
-        </div>
-
-      </div>
-    </main>
-  )
+  return <BlogListClient posts={posts} />
 }
