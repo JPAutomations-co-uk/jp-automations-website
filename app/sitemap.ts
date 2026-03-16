@@ -53,6 +53,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${base}/blog/email-marketing-uk-service-businesses`,
+      lastModified: new Date("2026-03-09"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${base}/blog/how-to-use-ai-effectively`,
+      lastModified: new Date("2026-03-07"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${base}/blog/business-process-automation-uk-service-businesses`,
       lastModified: new Date("2026-03-05"),
       changeFrequency: "monthly",
@@ -88,6 +100,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    {
+      url: `${base}/blog/automate-google-reviews-uk-trades`,
+      lastModified: new Date("2026-03-16"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    // SCHEDULED-BLOG-MARKER
 
     // Lead magnet landing pages (publicly discoverable)
     {
@@ -151,7 +170,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     },
 
+    // Newsletter
+    {
+      url: `${base}/newsletter`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+
     // Apps (public-facing pages)
+    {
+      url: `${base}/apps/social-engine`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
     {
       url: `${base}/apps/ai-news-filter`,
       lastModified: now,
@@ -159,31 +192,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${base}/apps/instagram-content`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/apps/linkedin-content`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
       url: `${base}/apps/seo-blog`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/apps/x-content`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/apps/youtube-content`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,

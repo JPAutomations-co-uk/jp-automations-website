@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { motion } from "framer-motion"
 
 const ease = [0.16, 1, 0.3, 1] as [number, number, number, number]
@@ -23,6 +24,7 @@ type BlogPost = {
   slug: string
   image: string
   date: string
+  publishDate?: string
 }
 
 export default function BlogListClient({ posts }: { posts: BlogPost[] }) {
@@ -86,9 +88,11 @@ export default function BlogListClient({ posts }: { posts: BlogPost[] }) {
             >
               <div className="aspect-[16/10] overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                <img
+                <Image
                   src={post.image}
                   alt={post.title}
+                  width={800}
+                  height={500}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
               </div>

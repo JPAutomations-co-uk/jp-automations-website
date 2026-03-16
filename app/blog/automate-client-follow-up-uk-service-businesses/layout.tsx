@@ -1,3 +1,4 @@
+import BlogBreadcrumb from "@/app/components/BlogBreadcrumb"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -32,5 +33,10 @@ export const metadata: Metadata = {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return children
+  return (
+    <>
+      <BlogBreadcrumb title="Automate Client Follow-Up Without a CRM" slug="automate-client-follow-up-uk-service-businesses" />
+      {children}
+    </>
+  )
 }
