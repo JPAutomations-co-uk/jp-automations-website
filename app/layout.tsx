@@ -59,31 +59,95 @@ export const metadata: Metadata = {
   },
 }
 
-const localBusinessSchema = {
+const organizationSchema = {
   "@context": "https://schema.org",
-  "@type": "LocalBusiness",
+  "@type": "ProfessionalService",
   name: "JP Automations",
+  alternateName: "JP Automations AI Agency",
   description:
-    "We build bespoke AI automation systems for UK service businesses doing £15k+/month. 25+ hours reclaimed per week. ROI within 90 days.",
+    "UK AI agency building bespoke automation systems for service businesses. We design and implement AI-powered lead generation, invoicing, CRM, and operations automation. 25+ hours reclaimed per week. ROI within 90 days.",
   url: "https://www.jpautomations.co.uk",
   logo: "https://www.jpautomations.co.uk/logo.png",
   image: "https://www.jpautomations.co.uk/og-image.png",
+  email: "jp@jpautomations.com",
+  telephone: "",
+  founder: {
+    "@type": "Person",
+    name: "James Harvey",
+    url: "https://www.linkedin.com/in/james-harvey-0583b2370/",
+    jobTitle: "Founder",
+  },
   address: {
     "@type": "PostalAddress",
     addressCountry: "GB",
+    addressRegion: "United Kingdom",
   },
-  areaServed: {
-    "@type": "Country",
-    name: "United Kingdom",
-  },
+  areaServed: [
+    { "@type": "Country", name: "United Kingdom" },
+    { "@type": "City", name: "London" },
+    { "@type": "City", name: "Manchester" },
+    { "@type": "City", name: "Birmingham" },
+    { "@type": "City", name: "Leeds" },
+  ],
+  serviceType: [
+    "AI Automation Agency",
+    "Business Process Automation",
+    "AI Consulting",
+    "Lead Generation Automation",
+    "CRM Automation",
+    "Invoice Automation",
+    "WhatsApp Automation",
+    "AI Phone Answering",
+  ],
   priceRange: "££",
+  sameAs: [
+    "https://www.instagram.com/jpautomations/",
+    "https://youtube.com/@jpautomations",
+    "https://www.linkedin.com/in/james-harvey-0583b2370/",
+    "https://x.com/JamesHarve24282",
+  ],
   knowsAbout: [
     "AI Automation",
+    "AI Agency",
     "Business Process Automation",
     "Lead Generation Automation",
     "CRM Automation",
     "Invoice Automation",
+    "WhatsApp Business Automation",
+    "AI for Service Businesses",
+    "AI for Tradespeople",
+    "Workflow Automation UK",
   ],
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "AI Automation Services",
+    itemListElement: [
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Lead Generation & Enquiry Automation",
+          description: "Automated lead capture, qualification, and follow-up for UK service businesses.",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Invoice & Payment Automation",
+          description: "Automated invoicing, payment reminders, and cash flow recovery systems.",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "CRM & Operations Automation",
+          description: "End-to-end job management, scheduling, and client communication automation.",
+        },
+      },
+    ],
+  },
 }
 
 export default function RootLayout({
@@ -124,7 +188,7 @@ export default function RootLayout({
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         <AuthProvider>{children}</AuthProvider>
         <NewsletterPopup />

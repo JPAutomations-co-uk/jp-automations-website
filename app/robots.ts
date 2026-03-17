@@ -9,7 +9,10 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/dashboard",
           "/dashboard/",
+          "/apps",
+          "/apps/",
           "/login",
+          "/signup",
           "/api/",
           "/onboarding",
           "/onboarding/",

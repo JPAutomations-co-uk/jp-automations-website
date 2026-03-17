@@ -603,33 +603,54 @@ export default function Page() {
         </Link>
       </section>
 
+      {/* Service pages */}
+      <section className="mt-16 mb-12">
+        <h2 className="text-2xl font-bold mb-4">AI Automation by Location</h2>
+        <p className="text-gray-400 text-sm mb-4">
+          We serve service businesses across the entire United Kingdom. Learn more about our AI automation services in your area:
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+          <Link href="/ai-agency-uk" className="text-teal-400 hover:underline text-sm">UK AI Agency →</Link>
+          <Link href="/ai-agency-london" className="text-teal-400 hover:underline text-sm">AI Agency London →</Link>
+          <Link href="/ai-agency-manchester" className="text-teal-400 hover:underline text-sm">AI Agency Manchester →</Link>
+          <Link href="/ai-agency-birmingham" className="text-teal-400 hover:underline text-sm">AI Agency Birmingham →</Link>
+          <Link href="/ai-agency-leeds" className="text-teal-400 hover:underline text-sm">AI Agency Leeds →</Link>
+        </div>
+      </section>
+
       {/* Internal links */}
-      <section className="mt-16">
+      <section>
         <p className="text-gray-500 text-sm mb-4">Further reading</p>
         <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-          <Link
-            href="/blog/automate-client-follow-up-uk-service-businesses"
-            className="text-teal-400 hover:underline text-sm"
-          >
+          <Link href="/blog/automate-client-follow-up-uk-service-businesses" className="text-teal-400 hover:underline text-sm">
             How to Automate Client Follow-Up Without a CRM →
           </Link>
-          <Link
-            href="/blog/biggest-automation-mistakes-service-businesses"
-            className="text-teal-400 hover:underline text-sm"
-          >
+          <Link href="/blog/biggest-automation-mistakes-service-businesses" className="text-teal-400 hover:underline text-sm">
             The Biggest Automation Mistakes Service Businesses Make →
           </Link>
-          <Link
-            href="/blog/essential-business-systems"
-            className="text-teal-400 hover:underline text-sm"
-          >
+          <Link href="/blog/essential-business-systems" className="text-teal-400 hover:underline text-sm">
             The 3 Systems Every Scalable Business Needs →
           </Link>
-          <Link
-            href="/blog/invoice-case-study"
-            className="text-teal-400 hover:underline text-sm"
-          >
+          <Link href="/blog/invoice-case-study" className="text-teal-400 hover:underline text-sm">
             Case Study: 25 Hours Reclaimed, £10k Recovered →
+          </Link>
+          <Link href="/blog/business-process-automation-uk-service-businesses" className="text-teal-400 hover:underline text-sm">
+            5 Business Processes to Automate →
+          </Link>
+          <Link href="/blog/email-marketing-uk-service-businesses" className="text-teal-400 hover:underline text-sm">
+            Email Marketing for UK Service Businesses →
+          </Link>
+          <Link href="/blog/automate-google-reviews-uk-trades" className="text-teal-400 hover:underline text-sm">
+            Automate Google Reviews for Trades →
+          </Link>
+          <Link href="/blog/ai-automation-roofing-companies-uk" className="text-teal-400 hover:underline text-sm">
+            AI Automation for Roofing Companies →
+          </Link>
+          <Link href="/blog/whatsapp-automation-uk-service-businesses" className="text-teal-400 hover:underline text-sm">
+            WhatsApp Automation for Service Businesses →
+          </Link>
+          <Link href="/blog/lead-generation-automation-uk-service-businesses" className="text-teal-400 hover:underline text-sm">
+            Automated Lead Generation Systems →
           </Link>
         </div>
       </section>

@@ -1,8 +1,43 @@
 import type { MetadataRoute } from "next"
 
+/**
+ * Blog posts with their publish dates.
+ * When a new blog goes live, add it here — the sitemap auto-includes it
+ * only after the publishDate has passed.
+ */
+const blogPosts = [
+  { slug: "automate-google-reviews-uk-trades", date: "2026-03-16" },
+  { slug: "ai-automation-roofing-companies-uk", date: "2026-03-19" },
+  { slug: "whatsapp-automation-uk-service-businesses", date: "2026-03-23" },
+  { slug: "lead-generation-automation-uk-service-businesses", date: "2026-03-26" },
+  { slug: "ai-phone-answering-uk-tradespeople", date: "2026-03-30" },
+  { slug: "automate-quoting-invoicing-uk-trades", date: "2026-04-02" },
+  { slug: "ai-automation-cleaning-companies-uk", date: "2026-04-06" },
+  { slug: "crm-automation-personal-trainers-uk", date: "2026-04-09" },
+  { slug: "email-marketing-uk-service-businesses", date: "2026-03-09" },
+  { slug: "how-to-use-ai-effectively", date: "2026-03-07" },
+  { slug: "business-process-automation-uk-service-businesses", date: "2026-03-05" },
+  { slug: "automate-client-follow-up-uk-service-businesses", date: "2026-03-02" },
+  { slug: "invoice-case-study", date: "2026-01-24" },
+  { slug: "biggest-automation-mistakes-service-businesses", date: "2026-01-24" },
+  { slug: "essential-business-systems", date: "2026-01-24" },
+  // SCHEDULED-BLOG-MARKER
+]
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://www.jpautomations.co.uk"
   const now = new Date()
+  const today = now.toISOString().slice(0, 10)
+
+  // Only include published blog posts (publishDate <= today)
+  const publishedBlogs: MetadataRoute.Sitemap = blogPosts
+    .filter((post) => post.date <= today)
+    .map((post) => ({
+      url: `${base}/blog/${post.slug}`,
+      lastModified: new Date(post.date),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    }))
 
   return [
     // Core pages
@@ -17,12 +52,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.9,
-    },
-    {
-      url: `${base}/pricing`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
     },
     {
       url: `${base}/book-call`,
@@ -45,70 +74,50 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
 
-    // Blog
+    // Service pages
+    {
+      url: `${base}/ai-agency-uk`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.95,
+    },
+    {
+      url: `${base}/ai-agency-london`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${base}/ai-agency-manchester`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${base}/ai-agency-birmingham`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${base}/ai-agency-leeds`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+
+    // Blog index
     {
       url: `${base}/blog`,
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.8,
     },
-    {
-      url: `${base}/blog/email-marketing-uk-service-businesses`,
-      lastModified: new Date("2026-03-09"),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${base}/blog/how-to-use-ai-effectively`,
-      lastModified: new Date("2026-03-07"),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${base}/blog/business-process-automation-uk-service-businesses`,
-      lastModified: new Date("2026-03-05"),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${base}/blog/automate-client-follow-up-uk-service-businesses`,
-      lastModified: new Date("2026-03-02"),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${base}/blog/invoice-case-study`,
-      lastModified: new Date("2026-01-24"),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/blog/biggest-automation-mistakes-service-businesses`,
-      lastModified: new Date("2026-01-24"),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/blog/essential-business-systems`,
-      lastModified: new Date("2026-01-24"),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/blog/setup-your-ide-properly`,
-      lastModified: new Date("2026-03-04"),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/blog/automate-google-reviews-uk-trades`,
-      lastModified: new Date("2026-03-16"),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    // SCHEDULED-BLOG-MARKER
 
-    // Lead magnet landing pages (publicly discoverable)
+    // Published blog posts (auto-generated)
+    ...publishedBlogs,
+
+    // Lead magnet landing pages
     {
       url: `${base}/free-blueprint`,
       lastModified: now,
@@ -173,26 +182,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Newsletter
     {
       url: `${base}/newsletter`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-
-    // Apps (public-facing pages)
-    {
-      url: `${base}/apps/social-engine`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/apps/ai-news-filter`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/apps/seo-blog`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
