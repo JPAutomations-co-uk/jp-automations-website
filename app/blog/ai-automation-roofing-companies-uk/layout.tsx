@@ -8,10 +8,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://www.jpautomations.co.uk/blog/ai-automation-roofing-companies-uk",
   },
-  robots: {
-    index: false,
-    follow: false,
-  },
   openGraph: {
     title: "AI Automation for Roofing Companies in the UK | JP Automations",
     description:
