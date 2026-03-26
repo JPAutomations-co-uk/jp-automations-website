@@ -8,10 +8,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://www.jpautomations.co.uk/blog/lead-generation-automation-uk-service-businesses",
   },
-  robots: {
-    index: false,
-    follow: false,
-  },
   openGraph: {
     title: "Automated Lead Generation for UK Service Businesses | JP Automations",
     description:
