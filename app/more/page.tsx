@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import MorePageSections from "@/app/components/MorePageSections"
 import { AppsDropdown, AppsMobileLinks } from "@/app/components/AppsDropdown"
@@ -32,7 +33,7 @@ export default function MorePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-6 transition-all duration-300 border-b border-white/5 bg-black/20 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link className="relative z-50" href="/">
-            <img src="/logo.png" alt="JP Automations" className="h-11 md:h-16 w-auto hover:opacity-80 transition-opacity" />
+            <Image src="/logo.png" alt="JP Automations" width={160} height={64} className="h-11 md:h-16 w-auto hover:opacity-80 transition-opacity" />
           </Link>
 
           <div className="hidden md:flex items-center gap-5">

@@ -1,28 +1,36 @@
 import "./globals.css"
 
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Barlow, Barlow_Condensed, DM_Mono } from "next/font/google"
 import Script from "next/script"
 import { AuthProvider } from "@/app/components/AuthProvider"
 import NewsletterPopup from "@/app/components/NewsletterPopup"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const barlow = Barlow({
+  variable: "--font-barlow",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 })
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const barlowCondensed = Barlow_Condensed({
+  variable: "--font-barlow-condensed",
   subsets: ["latin"],
+  weight: ["700", "800"],
+})
+
+const dmMono = DM_Mono({
+  variable: "--font-dm-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
 })
 
 export const metadata: Metadata = {
   title: {
-    default: "JP Automations | AI Automation Agency for UK Service Businesses",
+    default: "JP Automations | Websites, AI Systems & Lead Gen for UK Trades",
     template: "%s | JP Automations",
   },
   description:
-    "We build bespoke AI automation systems for UK service businesses doing £15k+/month. 25+ hours reclaimed per week. ROI within 90 days. Systems live in 30 days.",
+    "Websites, Google & Meta ads, SEO, and AI infrastructure for UK tradespeople. We build the digital systems that bring in leads, handle admin, and grow your business without growing your workload.",
   alternates: {
     canonical: "https://www.jpautomations.co.uk",
     languages: {
@@ -65,7 +73,7 @@ const organizationSchema = {
   name: "JP Automations",
   alternateName: "JP Automations AI Agency",
   description:
-    "UK AI agency building bespoke automation systems for service businesses. We design and implement AI-powered lead generation, invoicing, CRM, and operations automation. 25+ hours reclaimed per week. ROI within 90 days.",
+    "UK AI automation agency for tradespeople and service businesses. We build bespoke systems for roofers, plumbers, electricians, builders, and landscapers — automating invoicing, call handling, follow-ups, and compliance. 90-day ROI guarantee.",
   url: "https://www.jpautomations.co.uk",
   logo: "https://www.jpautomations.co.uk/logo.png",
   image: "https://www.jpautomations.co.uk/og-image.png",
@@ -73,9 +81,9 @@ const organizationSchema = {
   telephone: "",
   founder: {
     "@type": "Person",
-    name: "James Harvey",
+    name: "JP",
     url: "https://www.linkedin.com/in/james-harvey-0583b2370/",
-    jobTitle: "Founder",
+    jobTitle: "Founder & AI Architect",
   },
   address: {
     "@type": "PostalAddress",
@@ -88,18 +96,30 @@ const organizationSchema = {
     { "@type": "City", name: "Manchester" },
     { "@type": "City", name: "Birmingham" },
     { "@type": "City", name: "Leeds" },
+    { "@type": "City", name: "Bristol" },
+    { "@type": "City", name: "Sheffield" },
+    { "@type": "City", name: "Liverpool" },
+    { "@type": "City", name: "Newcastle" },
   ],
   serviceType: [
-    "AI Automation Agency",
-    "Business Process Automation",
-    "AI Consulting",
-    "Lead Generation Automation",
-    "CRM Automation",
-    "Invoice Automation",
-    "WhatsApp Automation",
-    "AI Phone Answering",
+    "AI Automation for Tradespeople",
+    "Invoice Automation for Trades",
+    "AI Call Handling for Tradesmen",
+    "Compliance Automation for Electricians",
+    "CIS Automation for Builders",
+    "Quote Follow-Up Automation",
+    "Review Collection Automation",
+    "Maintenance Plan Automation for Landscapers",
   ],
   priceRange: "££",
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "5.0",
+    bestRating: "5",
+    worstRating: "1",
+    ratingCount: "5",
+    reviewCount: "5",
+  },
   sameAs: [
     "https://www.instagram.com/jpautomations/",
     "https://youtube.com/@jpautomations",
@@ -107,43 +127,60 @@ const organizationSchema = {
     "https://x.com/JamesHarve24282",
   ],
   knowsAbout: [
-    "AI Automation",
-    "AI Agency",
-    "Business Process Automation",
-    "Lead Generation Automation",
-    "CRM Automation",
-    "Invoice Automation",
-    "WhatsApp Business Automation",
-    "AI for Service Businesses",
-    "AI for Tradespeople",
-    "Workflow Automation UK",
+    "AI Automation for Roofers",
+    "AI Automation for Plumbers",
+    "AI Automation for Electricians",
+    "AI Automation for Builders",
+    "AI Automation for Landscapers",
+    "Invoice Automation UK Trades",
+    "AI Call Handling Tradesmen",
+    "CIS Automation Contractors",
+    "NICEIC Compliance Automation",
+    "Maintenance Contract Automation",
+    "Business Process Automation UK",
   ],
   hasOfferCatalog: {
     "@type": "OfferCatalog",
-    name: "AI Automation Services",
+    name: "AI Automation for UK Trades",
     itemListElement: [
       {
         "@type": "Offer",
         itemOffered: {
           "@type": "Service",
-          name: "Lead Generation & Enquiry Automation",
-          description: "Automated lead capture, qualification, and follow-up for UK service businesses.",
-        },
-      },
-      {
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
           name: "Invoice & Payment Automation",
-          description: "Automated invoicing, payment reminders, and cash flow recovery systems.",
+          description: "Automated invoicing on job completion with payment reminders at 7, 14, and 21 days. One client reduced outstanding from £8,400 to £320.",
         },
       },
       {
         "@type": "Offer",
         itemOffered: {
           "@type": "Service",
-          name: "CRM & Operations Automation",
-          description: "End-to-end job management, scheduling, and client communication automation.",
+          name: "AI Call Handling",
+          description: "AI system that answers every call, qualifies the job, texts the customer, and logs details. Eliminated 60%+ missed calls for a heating engineer.",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Compliance & Admin Automation",
+          description: "Automated certificates, building control notifications, CIS returns, and VAT prep. Cut admin from 8 hours to 30 minutes per week.",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Live Job Costing & CIS Management",
+          description: "Real-time job cost tracking, subcontractor payment statements, and automated CIS monthly returns. Improved margins from 8% to 16%.",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Maintenance Plan Engine",
+          description: "Automated recurring maintenance offers, scheduling, and invoicing. Built £3,995/month in recurring revenue for a landscaping company.",
         },
       },
     ],
@@ -157,7 +194,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-GB">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${barlow.variable} ${barlowCondensed.variable} ${dmMono.variable} antialiased`}>
         {/* GA4 */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-08MCS0VY3Z"

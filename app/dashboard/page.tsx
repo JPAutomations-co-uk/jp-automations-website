@@ -7,20 +7,12 @@ import { AppsDropdown, AppsMobileLinks } from "@/app/components/AppsDropdown"
 
 const apps = [
   {
-    name: "Instagram Content Engine",
+    name: "Social Media Engine",
     description:
-      "Generate scroll-stopping reels, carousels, images, and captions — or plan a full month of strategic content with funnel stages and a visual calendar.",
-    videoId: "", // YouTube video ID goes here
-    status: "live" as const,
-    href: "/dashboard/instagram",
-  },
-  {
-    name: "LinkedIn Content Engine",
-    description:
-      "Write high-performing LinkedIn posts, plan a month of strategic content across funnel stages, and generate on-brand images — all tuned to LinkedIn's algorithm and your business goals.",
+      "Create content for Instagram, LinkedIn, X, and YouTube — reels, carousels, posts, threads, outliers, and full content plans. All from one dashboard, one token balance.",
     videoId: "",
     status: "live" as const,
-    href: "/dashboard/linkedin",
+    href: "/apps/social-engine",
   },
   {
     name: "SEO Blog Writer",
@@ -29,22 +21,6 @@ const apps = [
     videoId: "",
     status: "live" as const,
     href: "/dashboard/seo-blog",
-  },
-  {
-    name: "YouTube Content Engine",
-    description:
-      "Find outlier YouTube videos in your niche, analyze why they perform, and generate title variants directly into your research sheet.",
-    videoId: "",
-    status: "live" as const,
-    href: "/dashboard/youtube",
-  },
-  {
-    name: "X Content Engine",
-    description:
-      "Goal-based monthly content plans, tweet and thread writing, and a tiered account strategy — all X-native. Threads, single tweets, and polls built around your growth goal. No Instagram formats.",
-    videoId: "",
-    status: "live" as const,
-    href: "/dashboard/x",
   },
 ]
 

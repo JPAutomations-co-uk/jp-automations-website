@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { logToSheet } from '@/app/lib/log-to-sheet';
 import { addToLoops } from '@/app/lib/loops';
+import { tryEnrollSequence } from '@/app/lib/email-suppression';
 
 const BOOKING_URL = process.env.BOOKING_URL || 'https://calendar.app.google/hDU4A5Z4ZMKSiVAS7';
 
@@ -114,6 +115,11 @@ export async function POST(request: NextRequest) {
       'Team Size': teamSize || '',
       'Main Challenge': bottleneck || '',
     });
+
+    // Register apply sequence (highest priority — always sends, suppresses others)
+    tryEnrollSequence(email, 'apply').catch((err) =>
+      console.error('Suppression enroll error:', err)
+    );
 
     // ── Email 0: JP notification (instant) ──────────────────────────────────
     await resend.emails.send({

@@ -17,6 +17,7 @@ export default function OnboardingComplete() {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            use_case: data.useCase,
             business_name: data.businessName,
             website_url: data.websiteUrl,
             location: data.location,
@@ -31,6 +32,8 @@ export default function OnboardingComplete() {
             x_handle: data.xHandle,
             linkedin_handle: data.linkedinHandle,
             proof_points: data.proofPoints,
+            goals: data.goals,
+            desired_outcomes: data.desiredOutcomes,
             onboarding_complete: true,
           }),
         })
@@ -39,6 +42,68 @@ export default function OnboardingComplete() {
           const body = await res.json()
           throw new Error(body.error || "Failed to save profile")
         }
+
+        // Save platform profiles
+        for (const platform of data.selectedPlatforms) {
+          const pp = data.platformProfiles[platform]
+          if (!pp) continue
+
+          // Merge global copy examples (from step 4) with any platform-specific ones
+          const globalExamples = [data.voiceSample, data.copyExample2, data.copyExample3]
+            .filter((s) => s.trim())
+          const copyExamples = globalExamples.length > 0 ? globalExamples : pp.copyExamples
+
+          // Build style_description with writing rhythm + banned words
+          const bannedWordsList = data.bannedWords
+            ? data.bannedWords.split(",").map((w: string) => w.trim()).filter(Boolean)
+            : []
+          const styleDescription = JSON.stringify({
+            writing_style: data.writingRhythm || "mixed",
+            voice_traits: data.voiceTraits ?? [],
+            banned_words: bannedWordsList,
+          })
+
+          await fetch("/api/platform-profiles", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              platform,
+              tone: data.tone,
+              copy_examples: copyExamples,
+              example_image_urls: pp.exampleImageUrls,
+              goals: pp.goals,
+              primary_cta: pp.cta,
+              posting_frequency: pp.frequency,
+              style_description: styleDescription,
+            }),
+          })
+        }
+
+        // Save X content profile
+        const bannedWords = data.xBannedWords
+          ? data.xBannedWords.split(",").map((w: string) => w.trim()).filter(Boolean)
+          : []
+
+        await fetch("/api/x-profile", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: data.businessName,
+            niche: data.industry,
+            audience_description: data.targetAudience,
+            tone: data.tone,
+            writing_style: data.xWritingStyle,
+            hook_style: data.xHookStyle,
+            post_length_preference: data.xPostLengthPreference,
+            hashtag_preference: data.xHashtagPreference,
+            banned_words: bannedWords,
+            cta_preference: data.xCtaPreference,
+            current_followers: parseInt(data.xCurrentFollowers, 10) || 0,
+            growth_goal: data.xGrowthGoal,
+            growth_timeframe: data.xGrowthGoal,
+            secondary_metric: data.xSecondaryMetric,
+          }),
+        })
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong")
       } finally {
@@ -121,7 +186,11 @@ export default function OnboardingComplete() {
             { label: "Tone", value: data.tone },
             { label: "Offers", value: data.offers ? "✓ Added" : "—" },
             { label: "USP", value: data.usp ? "✓ Added" : "—" },
+            { label: "Goal", value: data.goals || "—" },
             { label: "Proof points", value: data.proofPoints ? "✓ Added" : "—" },
+            { label: "Platforms", value: data.selectedPlatforms.length > 0 ? data.selectedPlatforms.map(p => p === "x" ? "X" : p.charAt(0).toUpperCase() + p.slice(1)).join(", ") : "—" },
+            { label: "X writing style", value: data.xWritingStyle || "—" },
+            { label: "X hook style", value: data.xHookStyle || "—" },
           ].map(({ label, value }) => (
             <div key={label} className="flex items-center justify-between gap-4">
               <span className="text-xs text-gray-500">{label}</span>

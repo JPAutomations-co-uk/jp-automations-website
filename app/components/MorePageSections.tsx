@@ -562,6 +562,12 @@ export default function MorePageSections() {
           >
             {[
               {
+                title: "Email Marketing for UK Service Businesses That Actually Converts",
+                excerpt: "How to automate email campaigns that convert enquiries into paying clients \u2014 without the manual work.",
+                slug: "/blog/email-marketing-uk-service-businesses",
+                image: "/blog/email.jpg"
+              },
+              {
                 title: "How to Actually Use AI \u2014 99% of People Are Doing This Wrong",
                 excerpt: "Vague prompts get vague outputs. The four-layer prompt framework, iteration mindset, and model selection strategy that changes everything.",
                 slug: "/blog/how-to-use-ai-effectively",
@@ -578,12 +584,6 @@ export default function MorePageSections() {
                 excerpt: "Most service businesses lose leads not because of bad pricing \u2014 but because follow-up is slow or inconsistent. Here\u2019s how to fix it.",
                 slug: "/blog/automate-client-follow-up-uk-service-businesses",
                 image: "/blog/follow-up.webp"
-              },
-              {
-                title: "Case Study: Invoicing System",
-                excerpt: "How this roofing business saves 25 hours/week & recovered \u00A32,995 in revenue",
-                slug: "/blog/invoice-case-study",
-                image: "/blog/case-study-invoice.webp"
               },
             ].map((post) => (
               <motion.a

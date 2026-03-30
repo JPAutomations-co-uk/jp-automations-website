@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { createClient } from "@/app/lib/supabase/server"
 import { createAdminClient } from "@/app/lib/supabase/admin"
+import { getProfileContext } from "@/app/lib/profile-context"
+import { buildMasterSystemPrompt, getUserFeedbackContext } from "@/app/lib/linkedin-master-prompt"
 
 const TOKEN_COST_SINGLE = 3
 const TOKEN_COST_BATCH_PER_ITEM = 2
 const MAX_BATCH_ITEMS = 20
 
-const VALID_GOALS = ["engagement", "leads", "authority", "shares"]
+const VALID_GOALS = ["engagement", "leads", "authority", "shares", "awareness"]
 const VALID_FORMATS = ["auto", "text_post", "story", "step_by_step", "bold_claim", "hot_take"]
 
 const GOAL_CTA_MAP: Record<string, string> = {
@@ -19,6 +21,8 @@ const GOAL_CTA_MAP: Record<string, string> = {
     "End with a credibility statement and soft invitation to follow for more expert insights",
   shares:
     "End with 'Tag someone who needs to read this' or 'Reshare this if you agree' to trigger shares",
+  awareness:
+    "NO CTA. End with a powerful standalone closing line or a genuine question. Zero promotional language — no mentions of offers, services, or booking. The post must stand completely alone as pure value.",
 }
 
 const FORMAT_DESCRIPTIONS: Record<string, string> = {
@@ -37,11 +41,6 @@ const FORMAT_DESCRIPTIONS: Record<string, string> = {
 
 const getAnthropic = () => new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-function sanitiseField(value: string | null | undefined, maxLen = 200): string {
-  if (!value) return ""
-  return String(value).replace(/[\n\r]/g, " ").slice(0, maxLen).trim()
-}
-
 function safeJsonParse(text: string): unknown | null {
   const cleaned = text
     .replace(/^```(?:json)?\s*/m, "")
@@ -56,33 +55,9 @@ function safeJsonParse(text: string): unknown | null {
   }
 }
 
-function buildSystemPrompt(): string {
-  return `You are a LinkedIn content specialist. You write posts that perform exceptionally well on LinkedIn — authentic, high-value, and structured for maximum dwell time and engagement.
+// buildSystemPrompt replaced by buildMasterSystemPrompt from linkedin-master-prompt.ts
 
-Your expertise includes:
-- **LinkedIn hooks**: Writing the first 2-3 lines (before "see more", ~210 characters) that force people to click. You use pattern interrupts, surprising stats, vulnerable moments, or counterintuitive claims. Never start with "I" or the business name.
-- **LinkedIn formatting**: Short paragraphs (1-3 sentences) separated by blank lines. Easy to skim, impossible to stop reading.
-- **Voice**: Personal, direct, human. You ruthlessly avoid corporate buzzwords, passive voice, and generic statements.
-- **CTAs**: Specific and natural — not forced. You ask genuine questions or make specific offers.
-- **Hashtag strategy**: 3-5 relevant hashtags at the very end. Never embedded in the post body. Never more than 5.
-- **Post formats**: You master text posts, personal stories, step-by-step breakdowns, bold claims, and hot takes.
-
-You ALWAYS respond with valid JSON only. No markdown fences, no explanation outside the JSON object.`
-}
-
-function buildSinglePrompt(
-  content: string,
-  goal: string,
-  format: string,
-  profile: {
-    business_name?: string | null
-    industry?: string | null
-    target_audience?: string | null
-    brand_voice?: string | null
-    tone?: string | null
-    location?: string | null
-  }
-): string {
+function buildSinglePrompt(content: string, goal: string, format: string): string {
   return `Write a high-performing LinkedIn post for this content:
 
 ═══ CONTENT ═══
@@ -95,23 +70,15 @@ ${GOAL_CTA_MAP[goal] || ""}
 ═══ FORMAT ═══
 ${FORMAT_DESCRIPTIONS[format] || FORMAT_DESCRIPTIONS["auto"]}
 
-═══ BRAND CONTEXT ═══
-Business: ${sanitiseField(profile.business_name) || "Not specified"}
-Industry: ${sanitiseField(profile.industry) || "General"}
-Target Audience: ${sanitiseField(profile.target_audience, 500) || "Business professionals"}
-Brand Voice: ${sanitiseField(profile.brand_voice) || "Professional"}
-Tone: ${sanitiseField(profile.tone) || "Authoritative but approachable"}
-Location: ${sanitiseField(profile.location) || "UK"}
-
 ═══ LINKEDIN RULES ═══
-1. The hook (first 2-3 lines, max ~210 characters) determines if people click "see more". Use: specific numbers, personal vulnerability, counterintuitive takes, or bold statements.
+1. The hook (first 2 lines, max ~110 chars mobile / ~140 chars desktop before "see more") is everything. Numbers in first 8 words = +41% clicks. Two-sentence hooks beat one-line by 20%.
 2. Never start with "I" or the business name as the very first word. Start mid-story or with the most interesting part.
 3. Use short paragraphs (1-3 sentences) separated by \\n\\n. LinkedIn readers skim — make it easy.
 4. Avoid corporate buzzwords: "synergy", "leverage", "paradigm", "circle back", "game-changer", "disruptive".
-5. CTA must be specific and natural: ${GOAL_CTA_MAP[goal] || "Include a clear call to action"}
-6. 3-5 hashtags at the very end, NEVER embedded in the body.
-7. Total post: 150-2000 characters. Ideal length: 300-800 for most formats, 800-1500 for story/long-form.
-8. Writing score (0-100): hook strength + readability + authenticity + CTA clarity.
+5. CTA rule (STRICTLY FOLLOW): ${GOAL_CTA_MAP[goal] || "Include a clear call to action"}
+6. Total post: 150-2000 characters. Ideal length: 300-800 for most formats, 800-1500 for story/long-form.
+7. VOICE: The hook and every line must sound exactly like the user — not a LinkedIn template. Match their sentence rhythm, punctuation style, and vocabulary from the context above.
+8. Writing score (0-100): hook strength + voice authenticity + readability + CTA compliance.
 
 ═══ RESPONSE FORMAT ═══
 Respond with this exact JSON (no markdown, no code fences):
@@ -119,26 +86,13 @@ Respond with this exact JSON (no markdown, no code fences):
   "hook": "The first 2-3 lines that appear before 'see more' (max ~210 characters)",
   "body": "The main body with \\n\\n for paragraph breaks",
   "cta": "The call-to-action line",
-  "hashtags": ["hashtag1", "hashtag2", "hashtag3"],
-  "full_post": "Complete post ready to paste: hook + \\n\\n + body + \\n\\n + cta + \\n\\n + hashtags joined by spaces",
+  "full_post": "Complete post ready to paste: hook + \\n\\n + body + \\n\\n + cta",
   "writing_score": 85,
   "writing_tips": ["Specific improvement tip 1", "Specific improvement tip 2"]
 }`
 }
 
-function buildBatchPrompt(
-  items: string[],
-  goal: string,
-  format: string,
-  profile: {
-    business_name?: string | null
-    industry?: string | null
-    target_audience?: string | null
-    brand_voice?: string | null
-    tone?: string | null
-    location?: string | null
-  }
-): string {
+function buildBatchPrompt(items: string[], goal: string, format: string): string {
   const numberedItems = items.map((item, i) => `${i + 1}. ${item}`).join("\n")
 
   return `Write high-performing LinkedIn posts for each of these ${items.length} content ideas:
@@ -153,23 +107,14 @@ ${GOAL_CTA_MAP[goal] || ""}
 ═══ FORMAT ═══
 ${FORMAT_DESCRIPTIONS[format] || FORMAT_DESCRIPTIONS["auto"]}
 
-═══ BRAND CONTEXT ═══
-Business: ${sanitiseField(profile.business_name) || "Not specified"}
-Industry: ${sanitiseField(profile.industry) || "General"}
-Target Audience: ${sanitiseField(profile.target_audience, 500) || "Business professionals"}
-Brand Voice: ${sanitiseField(profile.brand_voice) || "Professional"}
-Tone: ${sanitiseField(profile.tone) || "Authoritative but approachable"}
-Location: ${sanitiseField(profile.location) || "UK"}
-
 ═══ LINKEDIN RULES ═══
-1. Each hook (max ~210 characters) must stop the scroll — pattern interrupts, specific numbers, personal vulnerability.
+1. Each hook (~110 chars mobile / ~140 chars desktop before "see more") must stop the scroll. Numbers in first 8 words, two-sentence structure. Sound like them, not a template.
 2. Never start any post with "I" or the business name as the very first word.
 3. Short paragraphs separated by \\n\\n throughout.
 4. Avoid all corporate buzzwords.
 5. Each CTA must be specific: ${GOAL_CTA_MAP[goal] || "Clear call to action"}
-6. 3-5 hashtags per post at the very end only.
-7. Each post MUST be UNIQUE — different hooks, angles, formats, and approaches.
-8. Writing score (0-100) per post.
+6. Each post MUST be UNIQUE — different hooks, angles, formats, and approaches.
+7. Writing score (0-100) per post.
 
 ═══ RESPONSE FORMAT ═══
 Respond with this exact JSON (no markdown, no code fences):
@@ -181,7 +126,6 @@ Respond with this exact JSON (no markdown, no code fences):
       "hook": "The first 2-3 lines before see more",
       "body": "Main body with \\n\\n paragraph breaks",
       "cta": "Call to action",
-      "hashtags": ["hashtag1", "hashtag2"],
       "full_post": "Complete post ready to paste",
       "writing_score": 85,
       "writing_tips": ["Tip 1", "Tip 2"]
@@ -244,23 +188,21 @@ export async function POST(request: NextRequest) {
       tokenCost = batchItems.length * TOKEN_COST_BATCH_PER_ITEM
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("business_name, industry, target_audience, brand_voice, tone, location")
-      .eq("id", user.id)
-      .single()
+    // Fetch full profile + platform-specific context + feedback
+    const { contextBlock } = await getProfileContext(user.id, "linkedin")
+    const feedbackConstraints = await getUserFeedbackContext(user.id)
 
     const userPrompt =
       mode === "single"
-        ? buildSinglePrompt(safeContent, goal, safeFormat, profile || {})
-        : buildBatchPrompt(batchItems, goal, safeFormat, profile || {})
+        ? buildSinglePrompt(safeContent, goal, safeFormat)
+        : buildBatchPrompt(batchItems, goal, safeFormat)
 
     const maxTokens = mode === "single" ? 2000 : Math.min(batchItems.length * 1500, 8000)
 
     const message = await getAnthropic().messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: maxTokens,
-      system: buildSystemPrompt(),
+      system: buildMasterSystemPrompt(contextBlock, feedbackConstraints),
       messages: [{ role: "user", content: userPrompt }],
     })
 

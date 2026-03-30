@@ -3,6 +3,17 @@ import Anthropic from "@anthropic-ai/sdk"
 import { createClient } from "@/app/lib/supabase/server"
 import { createAdminClient } from "@/app/lib/supabase/admin"
 import { checkRateLimit, resolveRequestActorId } from "@/app/lib/security/rate-limit"
+import {
+  TONE_DESCRIPTIONS,
+  GOAL_CTA_MAP,
+  buildTweetSystemPrompt,
+  buildThreadSystemPrompt,
+  buildXProfileBlock,
+  getUserFeedbackContext,
+  type XProfileContext,
+} from "@/app/lib/x-master-prompt"
+
+export const maxDuration = 120
 
 const THREAD_TYPES = [
   "Educational",
@@ -31,17 +42,6 @@ const TONES = [
   "Story",
   "Professional",
 ] as const
-
-const TONE_DESCRIPTIONS: Record<string, string> = {
-  Direct: "Be sharp, confident, and brutally concise. Cut every word that doesn't earn its place.",
-  Casual: "Sound like a smart friend texting. Warm, relatable, no corporate-speak.",
-  Bold: "Make provocative claims. Challenge the status quo. Polarise — that's the point.",
-  Witty: "Be clever and punchy. Wordplay, unexpected angles, and dry humour are welcome.",
-  Educational: "Clear, structured, authoritative. Teach with precision — every point must land.",
-  Inspirational: "Energise and motivate. Make the reader feel capable and ready to act.",
-  Story: "Use narrative. 'I', 'my client', 'we'. Make it personal and immersive.",
-  Professional: "Polished and credible. Business-minded. No slang, no fluff, no hype.",
-}
 
 type ThreadType = (typeof THREAD_TYPES)[number]
 type Goal = (typeof GOALS)[number]
@@ -81,6 +81,8 @@ function cleanMultilineText(value: unknown, maxLen: number): string {
     .slice(0, maxLen)
 }
 
+// ─── Profile contexts ────────────────────────────────────────────────────────
+
 type ProfileContext = {
   business_name?: string | null
   industry?: string | null
@@ -108,101 +110,115 @@ async function fetchProfileContext(
   return (data || {}) as ProfileContext
 }
 
-function buildMasterPromptBlock(masterPrompt: string): string {
-  if (!masterPrompt.trim()) return ""
-  return `\nMASTER PROMPT (user-defined rules — follow these precisely above all else):
-${masterPrompt.trim()}
-`
+async function fetchXProfileContext(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string
+): Promise<XProfileContext> {
+  const { data, error } = await supabase
+    .from("x_profiles")
+    .select("name, niche, audience_description, tone, writing_style, hook_style, post_length_preference, hashtag_preference, banned_words, cta_preference, current_followers, growth_goal, secondary_metric")
+    .eq("id", userId)
+    .single()
+  if (error) return {}
+  return (data || {}) as XProfileContext
 }
 
-function buildTweetSystemPrompt(goal: Goal, tone: string, masterPrompt: string): string {
-  const toneDesc = TONE_DESCRIPTIONS[tone] || TONE_DESCRIPTIONS.Direct
-  return `You are an elite X (Twitter) strategist and copywriter. Your mission: write scroll-stopping tweets that serve the goal of "${goal}".
-
-TONE: ${tone} — ${toneDesc}
-
-Every tweet must:
-- Open with a hook that stops the scroll in the first 5 words
-- Never start with "I" or the business name
-- Stay under 280 characters (count carefully)
-- End with either a soft CTA, open loop, or engagement trigger
-- Fully embody the "${tone}" tone throughout${buildMasterPromptBlock(masterPrompt)}
-Output valid JSON only. No markdown fences. No commentary.`
-}
+// ─── Tweet user prompt ───────────────────────────────────────────────────────
 
 function buildTweetPrompt(params: {
   topic: string
   goal: Goal
   tone: string
   profile: ProfileContext
+  xProfile: XProfileContext
 }): string {
-  const { topic, goal, tone, profile } = params
+  const { topic, goal, tone, profile, xProfile } = params
 
   const goalCTAMap: Record<Goal, string> = {
-    "Brand Awareness": "Follow for more / Repost if this resonates",
-    "Lead Generation": "DM me [word] / Link in bio / Comment below",
-    "Community Building": "Drop your answer below / What do you think?",
-    "Sales & Conversions": "DM me now / Link in bio to apply",
-    "Education & Authority": "Save this / Follow for daily [niche] insights",
+    "Brand Awareness": "Follow for more / Repost the first tweet if this helped",
+    "Lead Generation": "DM me [keyword] / Comment [word] and I'll send you [thing]",
+    "Community Building": "What would you add? / Which surprised you most? / Drop your take below",
+    "Sales & Conversions": "DM me [keyword] to get started / Link in bio to apply",
+    "Education & Authority": "Bookmark this / Follow for daily [niche] insights",
   }
 
-  return `Write 3 distinct tweet variants for this topic.
+  const lengthGuidance = xProfile.post_length_preference === "short"
+    ? "AIM FOR 71-100 CHARACTERS. Punchy one-liners."
+    : xProfile.post_length_preference === "long"
+      ? "AIM FOR 240-259 CHARACTERS. Substantive, multi-line format with line breaks."
+      : "AIM FOR 140-220 CHARACTERS. Medium length with clear structure."
+
+  return `Write 3 distinct tweet variants for this topic, PLUS 3 strategic reply templates.
 
 BUSINESS CONTEXT:
-- Business: ${profile.business_name || "Not provided"}
+- Business: ${profile.business_name || xProfile.name || "Not provided"}
 - Industry: ${profile.industry || "Not provided"}
-- Audience: ${profile.target_audience || "Not provided"}
+- Niche: ${xProfile.niche || profile.industry || "Not provided"}
+- Audience: ${xProfile.audience_description || profile.target_audience || "Not provided"}
 - Location: ${profile.location || "UK"}
 - X Handle: ${profile.x_handle || "Not provided"}
 - Offers: ${profile.offers || "Not provided"}
 - USP: ${profile.usp || "Not provided"}
-- Primary CTA: ${profile.primary_cta || "Not provided"}
+- Primary CTA: ${xProfile.cta_preference || profile.primary_cta || "Not provided"}
 - Proof Points: ${profile.proof_points || "Not provided"}
 - Voice Sample: ${profile.voice_sample || "Not provided — write in the specified tone"}
+- Current Followers: ${xProfile.current_followers || "Not provided"}
 
 TOPIC: ${topic}
 GOAL: ${goal}
 TONE: ${tone}
 PREFERRED CTA STYLE: ${goalCTAMap[goal]}
+LENGTH: ${lengthGuidance}
 
-RULES:
-1. Each tweet must be under 280 characters — count carefully
-2. Each tweet must take a completely different angle (hot take / story / list / question / insight)
+RULES FOR THE 3 TWEET VARIANTS:
+1. Each tweet MUST use a different hook formula from the PROVEN HOOK FORMULAS list
+2. Each tweet MUST take a completely different angle:
+   - Variant 1: Hot take or contrarian angle — challenge conventional wisdom
+   - Variant 2: Story or personal experience angle — make it human and specific
+   - Variant 3: Educational or framework angle — teach something actionable
 3. Never start with "I" or the business name
-4. Hook must be the first line — make it impossible to scroll past
-5. Every word must serve the "${tone}" tone
+4. Format for mobile: short lines, strategic line breaks, one idea per line
+5. End each tweet with a CTA optimised for REPLIES or BOOKMARKS (highest algorithm weight)
+6. Use specific numbers, percentages, and concrete examples — never vague claims
+7. Write like a practitioner sharing field notes, not a marketer writing copy
+
+RULES FOR THE 3 STRATEGIC REPLIES:
+1. Each reply is designed to be posted under a larger account's tweet in the same niche
+2. Each reply uses a DIFFERENT reply type from the REPLY STRATEGY section:
+   - Reply 1: "Agree + Expand" — validate their point, add a layer they missed
+   - Reply 2: "Add the Missing Piece" — the insight their post left out
+   - Reply 3: "Polite Disagreement" or "Personal Story Validation" — stand out in the replies
+3. Add genuine value — a specific tactic, data point, contrarian take, or real example
+4. Never be generic. Be the reply that gets pinned or goes viral on its own
+5. Stay under 280 characters
+6. Sound like an authority without being salesy — earned expertise, not self-promotion
 
 Respond with valid JSON only:
 {
   "tweets": [
     {
-      "text": "full tweet text under 280 chars",
+      "text": "full tweet text under 280 chars — use \\n for line breaks",
       "hook": "the opening line",
-      "angle": "hot take | story | list | question | insight",
+      "hook_formula": "which hook formula was used (e.g. 'Contrarian Stat', 'Bold Declaration')",
+      "angle": "hot take | story | educational",
       "cta": "the call-to-action used",
       "char_count": 142,
-      "why_it_works": "one sentence explaining the mechanism"
-    },
-    { "text": "...", "hook": "...", "angle": "...", "cta": "...", "char_count": 0, "why_it_works": "..." },
-    { "text": "...", "hook": "...", "angle": "...", "cta": "...", "char_count": 0, "why_it_works": "..." }
+      "why_it_works": "one sentence explaining the psychological mechanism and algorithm signal this triggers"
+    }
+  ],
+  "replies": [
+    {
+      "text": "the reply text under 280 chars",
+      "scenario": "specific type of tweet to reply to (e.g. 'Someone sharing a win about landing clients through content')",
+      "strategy": "agree and expand | add missing piece | polite disagreement | personal story validation | summariser | extend conversation",
+      "char_count": 120,
+      "why_it_works": "one sentence on why this reply builds authority and triggers follow-backs"
+    }
   ]
 }`
 }
 
-function buildThreadSystemPrompt(goal: Goal, tone: string, masterPrompt: string): string {
-  const toneDesc = TONE_DESCRIPTIONS[tone] || TONE_DESCRIPTIONS.Direct
-  return `You are an elite X (Twitter) thread writer. Your mission: write high-performing threads that serve the goal of "${goal}".
-
-TONE: ${tone} — ${toneDesc}
-
-Every thread must:
-- Open with a hook tweet that cannot be scrolled past
-- Deliver compounding value tweet by tweet
-- End with a strong CTA tweet that matches the goal
-- Fully embody the "${tone}" tone throughout — every single tweet
-- Each tweet must be under 280 characters${buildMasterPromptBlock(masterPrompt)}
-Output valid JSON only. No markdown fences. No commentary.`
-}
+// ─── Thread user prompt ──────────────────────────────────────────────────────
 
 function buildThreadPrompt(params: {
   topic: string
@@ -210,84 +226,165 @@ function buildThreadPrompt(params: {
   goal: Goal
   tone: string
   profile: ProfileContext
+  xProfile: XProfileContext
 }): string {
-  const { topic, threadType, goal, tone, profile } = params
+  const { topic, threadType, goal, tone, profile, xProfile } = params
 
   const threadStructures: Record<ThreadType, string> = {
-    Educational: "Hook tweet → 6–10 value-packed insight tweets (numbered 1/ 2/ etc.) → Summary tweet → CTA tweet",
-    "How-To": "Hook tweet (promise the outcome) → 5–8 step tweets (Step 1: ... Step 2: ...) → Common mistakes tweet → CTA tweet",
-    Story: "Hook tweet (tension/result first) → Setup tweets (context) → Conflict tweets (the hard part) → Resolution tweets (the win) → Lesson tweet → CTA tweet",
-    "Case Study": "Hook tweet (the result) → Context tweet (who, what) → Problem tweets → Solution/process tweets → Results tweet (specifics) → What you can steal → CTA tweet",
-    "Hot Take": "Hook tweet (the bold claim) → Why most people are wrong → The evidence → The nuanced truth → What to do instead → CTA tweet",
-    "Social Proof": "Hook tweet (the transformation) → Before state tweets → Journey tweets → After state tweets (specifics) → What made the difference → CTA tweet",
+    Educational: `LISTICLE/FRAMEWORK THREAD:
+Tweet 1 (HOOK): "[N] [things] that [outcome] — most people only know 2:"
+Tweet 2 (FRAME): Quick context on why this matters
+Tweets 3-9 (POINTS): Each point = headline (5 words max) + 2-3 sentence explanation + one-line example
+Tweet 10 (SYNTHESIS): The meta-insight tying all points together
+Tweet 11 (CTA): "Which surprised you most? Reply below." + follow ask`,
+
+    "How-To": `PROBLEM-SOLUTION THREAD:
+Tweet 1 (HOOK): "If you're struggling with [problem], it's not your fault. Here's why:"
+Tweet 2 (PROBLEM): Diagnose the root cause, not the symptom
+Tweet 3 (AGITATE): Show what happens if the problem isn't solved
+Tweet 4 (REFRAME): Why most people try the wrong approach
+Tweets 5-8 (SOLUTION): Step-by-step implementation (→ Step 1: ... → Step 2: ...)
+Tweet 9 (RESULT): What changes when you do this consistently
+Tweet 10 (CTA): Follow ask + reply question`,
+
+    Story: `TRANSFORMATION THREAD:
+Tweet 1 (HOOK): "[Before state] → [After state]. Here's everything:"
+Tweet 2 (CONTEXT): Set the scene — who you were, what the problem was
+Tweet 3 (MISTAKE): The first thing you got wrong + why it fails
+Tweet 4 (TURNING): The insight or event that shifted everything
+Tweets 5-7 (SYSTEM): The actual approach/framework (3-4 key points)
+Tweet 8 (PROOF): Specific, quantifiable outcomes
+Tweet 9 (LESSON): One punchy, quotable takeaway
+Tweet 10 (CTA): Soft ask — follow/bookmark/reply`,
+
+    "Case Study": `BEHIND-THE-SCENES THREAD:
+Tweet 1 (HOOK): The result first — specific numbers
+Tweet 2 (CONTEXT): Who the client was, what they came with
+Tweets 3-4 (PROBLEM): What wasn't working and why
+Tweets 5-7 (PROCESS): Exactly what you did, step by step — show the work
+Tweet 8 (RESULTS): Before vs after with specific metrics
+Tweet 9 (STEAL THIS): The one thing anyone can take from this
+Tweet 10 (CTA): DM keyword or follow ask`,
+
+    "Hot Take": `CONTRARIAN ARGUMENT THREAD:
+Tweet 1 (HOOK): "Everyone says [common belief]. They're wrong. Here's the data:"
+Tweet 2 (CLAIM): State your contrarian position in one clear sentence
+Tweet 3 (WHY WRONG): Core flaw in mainstream thinking
+Tweets 4-5 (EVIDENCE): Stats, case study, personal experiment, research
+Tweet 6 (NUANCE): The part most people miss
+Tweet 7 (FRAMEWORK): Your alternative approach (3 principles)
+Tweet 8 (PROOF): What happened when you applied your approach
+Tweet 9 (CTA): "Disagree? Tell me what I'm missing. I read every reply."`,
+
+    "Social Proof": `TRANSFORMATION THREAD:
+Tweet 1 (HOOK): The transformation — specific numbers, before/after
+Tweet 2 (BEFORE): The starting state in vivid detail
+Tweets 3-4 (JOURNEY): The process — what was tried, what failed
+Tweets 5-6 (BREAKTHROUGH): What actually worked and why
+Tweet 7 (AFTER): The current state with specific metrics
+Tweet 8 (DIFFERENCE): The one thing that made the biggest difference
+Tweet 9 (LESSON): Universal principle anyone can apply
+Tweet 10 (CTA): Follow + bookmark ask`,
   }
 
   const goalCTAMap: Record<Goal, string> = {
-    "Brand Awareness": "Follow me @handle for more threads like this. Repost the first tweet if this helped someone you know.",
-    "Lead Generation": "Want help with [outcome]? DM me '[keyword]' and I'll send you [lead magnet]. Or: [link in bio]",
-    "Community Building": "Which part resonated most? Drop it in the replies. Let's build on this together.",
-    "Sales & Conversions": "Ready to [achieve outcome]? My [service/product] does exactly this. DM me 'ready' to get started.",
-    "Education & Authority": "Follow me @handle — I post [niche] insights like this daily. Save this thread to revisit later.",
+    "Brand Awareness": "Follow me @handle for more threads like this. Repost the first tweet to help someone you know.",
+    "Lead Generation": "Want help with [outcome]? DM me '[keyword]' and I'll send you [specific thing]. Or: link in bio.",
+    "Community Building": "Which point resonated most? Drop it in the replies. I read every one.",
+    "Sales & Conversions": "Ready to [achieve outcome]? DM me '[keyword]' to get started.",
+    "Education & Authority": "Follow me @handle — I break down [niche] like this daily. Bookmark this thread to revisit.",
   }
 
-  return `Write a ${threadType} thread on this topic.
+  return `Write a ${threadType} thread on this topic, PLUS 3 strategic reply templates.
 
 BUSINESS CONTEXT:
-- Business: ${profile.business_name || "Not provided"}
+- Business: ${profile.business_name || xProfile.name || "Not provided"}
 - Industry: ${profile.industry || "Not provided"}
-- Audience: ${profile.target_audience || "Not provided"}
+- Niche: ${xProfile.niche || profile.industry || "Not provided"}
+- Audience: ${xProfile.audience_description || profile.target_audience || "Not provided"}
 - Location: ${profile.location || "UK"}
 - X Handle: ${profile.x_handle || "Not provided"}
 - Offers: ${profile.offers || "Not provided"}
 - USP: ${profile.usp || "Not provided"}
-- Primary CTA: ${profile.primary_cta || "Not provided"}
+- Primary CTA: ${xProfile.cta_preference || profile.primary_cta || "Not provided"}
 - Proof Points: ${profile.proof_points || "Not provided"}
 - Voice Sample: ${profile.voice_sample || "Not provided — write in the specified tone"}
+- Current Followers: ${xProfile.current_followers || "Not provided"}
 
 TOPIC: ${topic}
 THREAD TYPE: ${threadType}
 GOAL: ${goal}
 TONE: ${tone}
-STRUCTURE: ${threadStructures[threadType]}
 CTA STYLE: ${goalCTAMap[goal]}
 
-RULES:
-1. Each tweet must be under 280 characters — count carefully
-2. Hook tweet (tweet 1) must stop the scroll immediately. Never start with "I" or the business name.
-3. Number the thread body tweets (1/ 2/ etc.) for clarity
-4. Avoid padding — every tweet must earn its place
-5. The final CTA tweet must match the goal directly
-6. Every tweet must fully embody the "${tone}" tone
-7. Use natural X writing style — punchy, conversational, direct
+THREAD BLUEPRINT TO FOLLOW:
+${threadStructures[threadType]}
+
+RULES FOR THREAD:
+1. Each tweet MUST be under 280 characters — count carefully (\\n = 1 char, emoji = 2 chars)
+2. Hook tweet (tweet 1) uses a formula from PROVEN HOOK FORMULAS — pick the strongest for this topic
+3. Never start the hook with "I" or the business name
+4. Number body tweets (1/ 2/ etc.) for clarity and read-through
+5. Every tweet must earn its place — ruthlessly cut padding and filler
+6. Use mini-cliffhangers every 2-3 tweets to maintain momentum
+7. Escalate value — don't front-load everything in the first 3 tweets
+8. The final CTA tweet must match the goal AND ask them to RT tweet 1 (concentrates algorithm signals)
+9. Every tweet must fully embody the "${tone}" tone
+10. Format for mobile: short lines, strategic line breaks, one idea per line
+11. Use specific numbers, examples, and concrete details — never vague claims
+12. Write like a practitioner sharing field notes, not a guru lecturing
+
+RULES FOR THE 3 STRATEGIC REPLIES:
+1. Each reply is designed to be posted under a larger account's tweet related to this thread's topic
+2. Each reply uses a DIFFERENT reply type:
+   - Reply 1: "Agree + Expand" — validate their point, add your layer
+   - Reply 2: "Add the Missing Piece" — the insight they left out
+   - Reply 3: "Polite Disagreement" or "Personal Story" — stand out in replies
+3. Add genuine value — a specific tactic, data point, or real example
+4. Never be generic. Be the reply that gets pinned or goes viral on its own
+5. Stay under 280 characters
+6. Sound like an authority without being salesy
 
 Respond with valid JSON only:
 {
   "thread": [
     {
       "tweet_number": 1,
-      "text": "hook tweet text",
+      "text": "hook tweet text — use \\n for line breaks",
       "type": "hook",
       "char_count": 180
     },
     {
       "tweet_number": 2,
-      "text": "1/ ...",
+      "text": "1/ body tweet text",
       "type": "body",
       "char_count": 210
     },
     {
-      "tweet_number": 8,
+      "tweet_number": 10,
       "text": "cta tweet text",
       "type": "cta",
       "char_count": 160
     }
   ],
   "hook": "the opening line of tweet 1",
+  "hook_formula": "which hook formula was used (e.g. 'Juxtaposition', 'Specific Promise')",
   "thread_type": "${threadType}",
-  "tweet_count": 8,
-  "goal_alignment": "one sentence on how this thread serves ${goal}"
+  "tweet_count": 10,
+  "goal_alignment": "one sentence on how this thread serves ${goal}",
+  "replies": [
+    {
+      "text": "reply text under 280 chars",
+      "scenario": "specific type of tweet to reply to",
+      "strategy": "agree and expand | add missing piece | polite disagreement | personal story validation | summariser | extend conversation",
+      "char_count": 120,
+      "why_it_works": "one sentence on why this reply builds authority and triggers follow-backs"
+    }
+  ]
 }`
 }
+
+// ─── POST handler ────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -361,25 +458,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const profile = await fetchProfileContext(supabase, user.id)
+    // Fetch profile contexts + feedback in parallel
+    const [profile, xProfile, feedbackConstraints] = await Promise.all([
+      fetchProfileContext(supabase, user.id),
+      fetchXProfileContext(supabase, user.id),
+      getUserFeedbackContext(user.id),
+    ])
 
     let responseText = ""
     if (mode === "tweet") {
       const message = await getAnthropic().messages.create({
         model: "claude-sonnet-4-6",
-        max_tokens: 2000,
+        max_tokens: 3000,
         temperature,
-        system: buildTweetSystemPrompt(goal, tone, masterPrompt),
-        messages: [{ role: "user", content: buildTweetPrompt({ topic, goal, tone, profile }) }],
+        system: buildTweetSystemPrompt(goal, tone, masterPrompt, xProfile, feedbackConstraints),
+        messages: [{ role: "user", content: buildTweetPrompt({ topic, goal, tone, profile, xProfile }) }],
       })
       responseText = message.content[0]?.type === "text" ? message.content[0].text : ""
     } else {
       const message = await getAnthropic().messages.create({
         model: "claude-sonnet-4-6",
-        max_tokens: 4000,
+        max_tokens: 5000,
         temperature,
-        system: buildThreadSystemPrompt(goal, tone, masterPrompt),
-        messages: [{ role: "user", content: buildThreadPrompt({ topic, threadType, goal, tone, profile }) }],
+        system: buildThreadSystemPrompt(goal, tone, masterPrompt, xProfile, feedbackConstraints),
+        messages: [{ role: "user", content: buildThreadPrompt({ topic, threadType, goal, tone, profile, xProfile }) }],
       })
       responseText = message.content[0]?.type === "text" ? message.content[0].text : ""
     }

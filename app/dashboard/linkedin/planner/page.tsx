@@ -1,16 +1,17 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/app/components/AuthProvider"
 import UserMenu from "@/app/components/UserMenu"
 import { AppsDropdown, AppsMobileLinks } from "@/app/components/AppsDropdown"
+import ChatQA, { type ChatMessage, type ButtonOption, type ChipOption } from "@/app/components/ChatQA"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type PostingFrequency = 3 | 5
+type PlanDuration = "1_week" | "2_weeks" | "3_weeks" | "4_weeks" | "full_month"
+type PostingFrequency = 1 | 2 | 3 | 4 | 5 | 6 | 7
 type FunnelStage = "TOFU" | "MOFU" | "BOFU"
-type AudienceSize = "0-1K" | "1K-10K" | "10K-50K" | "50K+"
 
 interface PlannedPost {
   id: string
@@ -26,8 +27,6 @@ interface PlannedPost {
   hashtags: string[]
   why_it_works?: string
   engagement_tip?: string
-  goal_alignment?: string
-  primary_kpi?: string
 }
 
 interface ContentPlan {
@@ -40,42 +39,48 @@ interface ContentPlan {
   posts: PlannedPost[]
 }
 
+interface ProfileData {
+  industry?: string | null
+  target_audience?: string | null
+  goals?: string | null
+  desired_outcomes?: string | null
+  content_pillars?: string[] | null
+  business_name?: string | null
+  business_description?: string | null
+  tone?: string | null
+}
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const GOAL_OPTIONS = [
-  "Lead Generation",
-  "Brand Awareness",
-  "Thought Leadership",
-  "Sales & Conversions",
-  "Community Building",
+const GOAL_OPTIONS: ButtonOption[] = [
+  { value: "Lead Generation", label: "Lead Generation", description: "Get enquiries, DMs, and calls" },
+  { value: "Brand Awareness", label: "Brand Awareness", description: "Reach new people and grow" },
+  { value: "Thought Leadership", label: "Thought Leadership", description: "Build expert reputation" },
+  { value: "Sales & Conversions", label: "Sales & Conversions", description: "Turn followers into clients" },
+  { value: "Community Building", label: "Community Building", description: "Build genuine connections" },
 ]
 
-const FORMAT_OPTIONS = [
-  { value: "Text Post", label: "Text Post", desc: "Personal, direct, conversational" },
-  { value: "Image Post", label: "Image Post", desc: "Single image with caption" },
-  { value: "Carousel", label: "Carousel", desc: "Multi-image educational posts" },
-  { value: "Long-form Post", label: "Long-form", desc: "Deep dives and detailed stories" },
-  { value: "Poll", label: "Poll", desc: "Questions that drive engagement" },
+const DURATION_OPTIONS: ButtonOption[] = [
+  { value: "1_week", label: "1 Week", description: "Quick sprint" },
+  { value: "2_weeks", label: "2 Weeks", description: "Short-term plan" },
+  { value: "3_weeks", label: "3 Weeks" },
+  { value: "4_weeks", label: "4 Weeks", description: "Full month" },
 ]
 
-const PILLAR_SUGGESTIONS = [
-  "Thought leadership",
-  "Client results",
-  "Behind the scenes",
-  "Tips & education",
-  "Industry trends",
-  "Personal stories",
-  "Case studies",
-  "Business lessons",
-  "Tool recommendations",
-  "Q&A / Myth busting",
+const FREQUENCY_OPTIONS: ButtonOption[] = [
+  { value: "1", label: "1x per week", description: "Minimal — just staying visible" },
+  { value: "2", label: "2x per week", description: "Consistent without the pressure" },
+  { value: "3", label: "3x per week", description: "Sweet spot for most people" },
+  { value: "4", label: "4x per week", description: "Strong presence, solid growth" },
+  { value: "5", label: "5x per week", description: "Weekday domination" },
+  { value: "6", label: "6x per week", description: "Near-daily, serious momentum" },
+  { value: "7", label: "7x per week", description: "Maximum growth — post every day" },
 ]
 
-const AUDIENCE_SIZE_OPTIONS: { value: AudienceSize; label: string; description: string }[] = [
-  { value: "0-1K", label: "Building", description: "0–1K connections" },
-  { value: "1K-10K", label: "Growing", description: "1K–10K connections" },
-  { value: "10K-50K", label: "Established", description: "10K–50K connections" },
-  { value: "50K+", label: "Large", description: "50K+ connections" },
+const DEFAULT_PILLARS = [
+  "Thought leadership", "Client results", "Behind the scenes",
+  "Tips & education", "Industry trends", "Personal stories",
+  "Case studies", "Business lessons", "Tool recommendations", "Q&A / Myth busting",
 ]
 
 const FUNNEL_COLOURS: Record<FunnelStage, string> = {
@@ -85,11 +90,7 @@ const FUNNEL_COLOURS: Record<FunnelStage, string> = {
 }
 
 const FORMAT_ICONS: Record<string, string> = {
-  "Text Post": "✎",
-  "Image Post": "◻",
-  "Carousel": "⊞",
-  "Long-form Post": "≡",
-  "Poll": "◎",
+  "Text Post": "✎", "Image Post": "◻", "Carousel": "⊞", "Long-form Post": "≡", "Poll": "◎",
 }
 
 const LOADING_MESSAGES = [
@@ -100,155 +101,388 @@ const LOADING_MESSAGES = [
   "Finalising your LinkedIn strategy...",
 ]
 
+const TOKEN_COST = 25
+
+// ─── Chat Steps ──────────────────────────────────────────────────────────────
+
+type ChatStep =
+  | "posted_recently"
+  | "top_content"
+  | "duration"
+  | "goal"
+  | "frequency"
+  | "topics"
+  | "review"
+  | "generating"
+  | "results"
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function LinkedInPlannerPage() {
   const { user, tokenBalance, refreshBalance } = useAuth()
   const router = useRouter()
 
-  // Form state
-  const [industry, setIndustry] = useState("")
-  const [businessDescription, setBusinessDescription] = useState("")
-  const [targetAudience, setTargetAudience] = useState("")
-  const [audienceSize, setAudienceSize] = useState<AudienceSize>("1K-10K")
-  const [goals, setGoals] = useState("Lead Generation")
-  const [desiredOutcomes, setDesiredOutcomes] = useState("")
-  const [postsPerWeek, setPostsPerWeek] = useState<PostingFrequency>(3)
-  const [month, setMonth] = useState(() => {
-    const now = new Date()
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
-  })
-  const [selectedFormats, setSelectedFormats] = useState<string[]>(["Text Post", "Image Post", "Carousel"])
-  const [pillars, setPillars] = useState<string[]>(["Thought leadership", "Client results", "Tips & education"])
-  const [customPillar, setCustomPillar] = useState("")
+  // Profile data
+  const [profile, setProfile] = useState<ProfileData | null>(null)
+  const [profileLoaded, setProfileLoaded] = useState(false)
+
+  // Chat state
+  const [step, setStep] = useState<ChatStep>("posted_recently")
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const msgIdRef = useRef(0)
+
+  // Collected answers
+  const [hasPostedRecently, setHasPostedRecently] = useState(false)
+  const [topContent, setTopContent] = useState("")
+  const [duration, setDuration] = useState<PlanDuration>("4_weeks")
+  const [goal, setGoal] = useState("")
+  const [frequency, setFrequency] = useState<PostingFrequency>(3)
+  const [topics, setTopics] = useState("")
+  const [selectedPillars, setSelectedPillars] = useState<string[]>([])
 
   // Generation state
   const [generating, setGenerating] = useState(false)
   const [loadingStep, setLoadingStep] = useState(0)
-  const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [error, setError] = useState("")
 
   // Results
   const [plan, setPlan] = useState<ContentPlan | null>(null)
   const [expandedPost, setExpandedPost] = useState<string | null>(null)
   const [copiedPost, setCopiedPost] = useState<string | null>(null)
+  const [generatingPostId, setGeneratingPostId] = useState<string | null>(null)
+  const [generatedPosts, setGeneratedPosts] = useState<Record<string, { full_post: string; writing_score: number }>>({})
+  const [generatingAll, setGeneratingAll] = useState(false)
+  const [generatingAllProgress, setGeneratingAllProgress] = useState(0)
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-
-  const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const mountedRef = useRef(true)
+  const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const TOKEN_COST = 25
+  useEffect(() => {
+    return () => { mountedRef.current = false }
+  }, [])
 
-  const toggleFormat = (fmt: string) => {
-    setSelectedFormats((prev) =>
-      prev.includes(fmt) ? prev.filter((f) => f !== fmt) : [...prev, fmt]
-    )
-  }
+  const nextId = () => `msg-${++msgIdRef.current}`
 
-  const togglePillar = (p: string) => {
-    setPillars((prev) => prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p])
-  }
+  const addMessage = useCallback((role: "assistant" | "user", content: string | React.ReactNode, isWidget = false) => {
+    setMessages((prev) => [...prev, { id: nextId(), role, content, isWidget }])
+  }, [])
 
-  const addCustomPillar = () => {
-    const trimmed = customPillar.trim()
-    if (trimmed && !pillars.includes(trimmed) && pillars.length < 8) {
-      setPillars((prev) => [...prev, trimmed])
-      setCustomPillar("")
+  // Load profile on mount
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/profile")
+        if (res.ok) {
+          const { profile: p } = await res.json()
+          setProfile(p)
+          if (p?.goals) setGoal(p.goals)
+          if (p?.content_pillars?.length) setSelectedPillars(p.content_pillars)
+        }
+      } catch { /* ignore */ }
+      setProfileLoaded(true)
     }
-  }
+    if (user) loadProfile()
+    else setProfileLoaded(true)
+  }, [user])
 
-  const canGenerate = industry.trim().length > 0 && targetAudience.trim().length > 0 && selectedFormats.length > 0
+  // Start chat when profile loads
+  useEffect(() => {
+    if (profileLoaded && messages.length === 0) {
+      addMessage("assistant", "Let's build your LinkedIn content plan. First — have you posted on LinkedIn recently?")
+    }
+  }, [profileLoaded, messages.length, addMessage])
+
+  // ─── Step Handlers ─────────────────────────────────────────────────────────
+
+  const handlePostedRecently = useCallback((value: string) => {
+    const yes = value === "yes"
+    setHasPostedRecently(yes)
+    addMessage("user", yes ? "Yes, I've been posting" : "No, I'm starting fresh")
+
+    if (yes) {
+      addMessage("assistant", "Great! Share your top 3 best-performing posts — paste the topics, hooks, or the content itself. This helps me optimise your plan based on what already works.")
+      setStep("top_content")
+    } else {
+      addMessage("assistant", "No problem — we'll build from scratch. How long should your content plan be?")
+      setStep("duration")
+    }
+  }, [addMessage])
+
+  const handleTopContent = useCallback((text: string) => {
+    setTopContent(text)
+    addMessage("user", text)
+    addMessage("assistant", "Got it — I'll use those as reference. How long should your content plan be?")
+    setStep("duration")
+  }, [addMessage])
+
+  const handleDuration = useCallback((value: string) => {
+    setDuration(value as PlanDuration)
+    const label = DURATION_OPTIONS.find((d) => d.value === value)?.label || value
+    addMessage("user", label)
+
+    const goalQuestion = profile?.goals
+      ? `What's your primary goal? Based on your profile, I'd suggest "${profile.goals}" — but feel free to change it.`
+      : "What's your primary goal for this plan?"
+    addMessage("assistant", goalQuestion)
+    setStep("goal")
+  }, [addMessage, profile])
+
+  const handleGoal = useCallback((value: string) => {
+    setGoal(value)
+    addMessage("user", value)
+    addMessage("assistant", "How often do you want to post? Pick whatever fits your schedule — more posts means faster growth, but consistency matters more than volume.")
+    setStep("frequency")
+  }, [addMessage])
+
+  const handleFrequency = useCallback((value: string) => {
+    const freq = Number(value) as PostingFrequency
+    setFrequency(freq)
+    addMessage("user", `${freq}x per week`)
+    addMessage("assistant", "Any specific topics or themes you want to focus on? Select from the pillars below, or skip to let me choose for you.")
+    setStep("topics")
+  }, [addMessage])
+
+  const handleTopicsSkip = useCallback(() => {
+    addMessage("user", "No specific topics — surprise me")
+    setStep("review")
+  }, [addMessage])
+
+  const handlePillarsSubmit = useCallback((selected: string[]) => {
+    setSelectedPillars(selected)
+    addMessage("user", selected.join(", "))
+    setStep("review")
+  }, [addMessage])
+
+  // ─── Generate Plan ─────────────────────────────────────────────────────────
 
   const handleGenerate = useCallback(async () => {
-    if (!canGenerate) return
-
     if (!user) {
       router.push("/login?redirect=/dashboard/linkedin/planner")
       return
     }
-
     if (tokenBalance < TOKEN_COST) {
-      setError(`Insufficient tokens. You need ${TOKEN_COST} tokens but have ${tokenBalance}.`)
+      setError(`Insufficient tokens. You need ${TOKEN_COST} but have ${tokenBalance}.`)
       return
     }
 
+    setStep("generating")
     setGenerating(true)
     setError("")
     setPlan(null)
-    setExpandedPost(null)
     setLoadingStep(0)
-    setElapsedSeconds(0)
 
     loadingIntervalRef.current = setInterval(() => {
       setLoadingStep((prev) => (prev + 1) % LOADING_MESSAGES.length)
     }, 4000)
 
-    timerIntervalRef.current = setInterval(() => {
-      setElapsedSeconds((prev) => prev + 1)
-    }, 1000)
-
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 180_000)
+    const now = new Date()
+    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
 
     try {
       const res = await fetch("/api/generate/linkedin-plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        signal: controller.signal,
         body: JSON.stringify({
           month,
-          postsPerWeek,
-          industry: industry.trim(),
-          businessDescription: businessDescription.trim(),
-          targetAudience: targetAudience.trim(),
-          audienceSize,
-          goals,
-          desiredOutcomes: desiredOutcomes.trim(),
-          contentPillars: pillars,
-          enabledFormats: selectedFormats,
+          postsPerWeek: frequency,
+          duration,
+          topPerformingContent: topContent || undefined,
+          industry: profile?.industry || "",
+          businessDescription: profile?.business_description || "",
+          targetAudience: profile?.target_audience || "",
+          audienceSize: "1K-10K",
+          goals: goal,
+          desiredOutcomes: profile?.desired_outcomes || "",
+          contentPillars: selectedPillars.length > 0 ? selectedPillars : undefined,
+          enabledFormats: ["Text Post", "Image Post", "Carousel", "Long-form Post", "Poll"],
+          additionalTopics: topics || undefined,
         }),
       })
 
       if (!mountedRef.current) return
       const data = await res.json()
-      if (!mountedRef.current) return
 
       if (!res.ok) {
         setError(data.error || "Generation failed. Please try again.")
+        setStep("review")
         return
       }
 
       setPlan(data.plan as ContentPlan)
       refreshBalance()
+
+      // Save plan to Supabase (non-blocking)
+      try {
+        await fetch("/api/plans", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: data.plan }),
+        })
+      } catch { /* non-critical */ }
+
+      setStep("results")
     } catch (err) {
       if (mountedRef.current) {
         const isTimeout = err instanceof DOMException && err.name === "AbortError"
-        setError(isTimeout ? "Generation timed out. Please try again." : "Something went wrong. Please try again.")
+        setError(isTimeout ? "Generation timed out." : "Something went wrong.")
+        setStep("review")
       }
     } finally {
-      clearTimeout(timeoutId)
       if (loadingIntervalRef.current) { clearInterval(loadingIntervalRef.current); loadingIntervalRef.current = null }
-      if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null }
       if (mountedRef.current) setGenerating(false)
     }
-  }, [canGenerate, user, tokenBalance, router, month, postsPerWeek, industry, businessDescription, targetAudience, audienceSize, goals, desiredOutcomes, pillars, selectedFormats, refreshBalance])
+  }, [user, tokenBalance, router, frequency, duration, topContent, goal, topics, selectedPillars, profile, refreshBalance])
 
-  const handleCopyPost = useCallback(async (post: PlannedPost) => {
-    const text = `${post.caption_hook}\n\n${post.description}\n\n${post.hashtags.map(h => `#${h}`).join(" ")}`
+  // ─── Generate Individual Post ──────────────────────────────────────────────
+
+  const mapGoalToApi = (g: string) => {
+    if (g.includes("Lead") || g.includes("Sales")) return "leads"
+    if (g.includes("Awareness") || g.includes("Community")) return "engagement"
+    if (g.includes("Thought")) return "authority"
+    return "engagement"
+  }
+
+  const handleGeneratePost = useCallback(async (post: PlannedPost) => {
+    if (!user || generatingPostId) return
+    setGeneratingPostId(post.id)
+
+    try {
+      const res = await fetch("/api/generate/linkedin-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "single",
+          content: `${post.caption_hook}\n\n${post.description}\n\nTopic: ${post.title}\nFormat: ${post.format}\nPillar: ${post.pillar}`,
+          goal: mapGoalToApi(goal),
+          format: "auto",
+        }),
+      })
+
+      const data = await res.json()
+      if (res.ok && data.posts?.[0]) {
+        setGeneratedPosts((prev) => ({
+          ...prev,
+          [post.id]: { full_post: data.posts[0].full_post, writing_score: data.posts[0].writing_score },
+        }))
+        refreshBalance()
+      }
+    } catch { /* ignore */ }
+    setGeneratingPostId(null)
+  }, [user, generatingPostId, goal, refreshBalance])
+
+  // ─── Generate All Posts ────────────────────────────────────────────────────
+
+  const handleGenerateAllPosts = useCallback(async () => {
+    if (!plan?.posts || generatingAll) return
+    setGeneratingAll(true)
+    setGeneratingAllProgress(0)
+
+    const ungenerated = plan.posts.filter((p) => !generatedPosts[p.id])
+
+    for (let i = 0; i < ungenerated.length; i++) {
+      const post = ungenerated[i]
+      setGeneratingAllProgress(i + 1)
+      setGeneratingPostId(post.id)
+
+      try {
+        const res = await fetch("/api/generate/linkedin-post", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mode: "single",
+            content: `${post.caption_hook}\n\n${post.description}\n\nTopic: ${post.title}\nFormat: ${post.format}\nPillar: ${post.pillar}`,
+            goal: mapGoalToApi(goal),
+            format: "auto",
+          }),
+        })
+
+        const data = await res.json()
+        if (res.ok && data.posts?.[0]) {
+          setGeneratedPosts((prev) => ({
+            ...prev,
+            [post.id]: { full_post: data.posts[0].full_post, writing_score: data.posts[0].writing_score },
+          }))
+          refreshBalance()
+        }
+      } catch { /* continue */ }
+    }
+
+    setGeneratingPostId(null)
+    setGeneratingAll(false)
+  }, [plan, generatingAll, generatedPosts, goal, refreshBalance])
+
+  // ─── Copy ──────────────────────────────────────────────────────────────────
+
+  const handleCopyPost = useCallback(async (text: string, postId: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      setCopiedPost(post.id)
+      setCopiedPost(postId)
       setTimeout(() => { if (mountedRef.current) setCopiedPost(null) }, 2000)
-    } catch {
-      setError("Failed to copy to clipboard.")
-    }
+    } catch { setError("Failed to copy.") }
   }, [])
+
+  const handleReset = useCallback(() => {
+    setMessages([])
+    setStep("posted_recently")
+    setPlan(null)
+    setExpandedPost(null)
+    setError("")
+    setGeneratedPosts({})
+    setHasPostedRecently(false)
+    setTopContent("")
+    setTopics("")
+    msgIdRef.current = 0
+    setTimeout(() => {
+      addMessage("assistant", "Let's build your LinkedIn content plan. First — have you posted on LinkedIn recently?")
+    }, 100)
+  }, [addMessage])
+
+  // ─── Input Mode ────────────────────────────────────────────────────────────
+
+  const getInputMode = () => {
+    if (step === "posted_recently") return "buttons" as const
+    if (step === "top_content") return "textarea" as const
+    if (step === "duration") return "buttons" as const
+    if (step === "goal") return "buttons" as const
+    if (step === "frequency") return "buttons" as const
+    if (step === "topics") return "chips" as const
+    return "none" as const
+  }
+
+  const getButtonOptions = (): ButtonOption[] => {
+    if (step === "posted_recently") return [
+      { value: "yes", label: "Yes", description: "I've been posting recently" },
+      { value: "no", label: "No", description: "Starting fresh or haven't posted in a while" },
+    ]
+    if (step === "duration") return DURATION_OPTIONS
+    if (step === "goal") return GOAL_OPTIONS
+    if (step === "frequency") return FREQUENCY_OPTIONS
+    return []
+  }
+
+  const getChipOptions = (): ChipOption[] => {
+    if (step !== "topics") return []
+    return DEFAULT_PILLARS.map((p) => ({
+      value: p,
+      label: p,
+      selected: selectedPillars.includes(p),
+    }))
+  }
+
+  const handleButtonSelect = (value: string) => {
+    if (step === "posted_recently") handlePostedRecently(value)
+    else if (step === "duration") handleDuration(value)
+    else if (step === "goal") handleGoal(value)
+    else if (step === "frequency") handleFrequency(value)
+  }
 
   const formatMonthDisplay = (m: string) => {
     const [y, mo] = m.split("-").map(Number)
     return new Date(y, mo - 1, 1).toLocaleDateString("en-GB", { month: "long", year: "numeric" })
   }
+
+  // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-[family-name:var(--font-geist-sans)]">
@@ -319,31 +553,80 @@ export default function LinkedInPlannerPage() {
             </div>
 
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Content Planner</h1>
-            <p className="text-gray-500">Generate a full month of LinkedIn content, strategically mapped to your goals.</p>
+            <p className="text-gray-500">Build a strategic LinkedIn content plan through a quick conversation.</p>
           </div>
 
-          {/* Loading */}
-          {generating && (
-            <div className="flex items-center justify-center min-h-[400px]">
-              <div className="text-center px-8 py-16">
-                <div className="w-16 h-16 rounded-full bg-teal-400/10 border border-teal-400/20 flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-7 h-7 text-teal-400 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                </div>
-                <p className="text-white font-semibold text-lg mb-2">Building your LinkedIn content plan</p>
-                <p className="text-gray-500 text-sm animate-pulse">{LOADING_MESSAGES[loadingStep]}</p>
-                <p className="text-gray-600 text-xs mt-3 font-mono tabular-nums">
-                  {Math.floor(elapsedSeconds / 60)}:{String(elapsedSeconds % 60).padStart(2, "0")}
-                  <span className="text-gray-700"> / ~30–60 sec</span>
-                </p>
-              </div>
-            </div>
-          )}
+          {/* Chat + Results */}
+          {step !== "results" ? (
+            <div className="max-w-2xl">
+              <ChatQA
+                messages={messages}
+                inputMode={step === "review" || step === "generating" ? "none" : getInputMode()}
+                buttonOptions={getButtonOptions()}
+                chipOptions={getChipOptions()}
+                placeholder="Paste your top performing content or describe the topics..."
+                optional={step === "topics"}
+                onSubmitText={step === "top_content" ? handleTopContent : undefined}
+                onSelectButton={handleButtonSelect}
+                onSubmitChips={handlePillarsSubmit}
+                onSkip={handleTopicsSkip}
+                loading={generating}
+                loadingMessage={LOADING_MESSAGES[loadingStep]}
+              >
+                {/* Review card */}
+                {step === "review" && (
+                  <div className="mt-4 animate-[fadeSlideIn_0.3s_ease-out]">
+                    <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-6 space-y-4">
+                      <h3 className="text-lg font-bold text-white">Your plan summary</h3>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <p className="text-gray-500 text-xs">Duration</p>
+                          <p className="text-white font-medium">{DURATION_OPTIONS.find((d) => d.value === duration)?.label}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs">Goal</p>
+                          <p className="text-white font-medium">{goal}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs">Frequency</p>
+                          <p className="text-white font-medium">{frequency}x per week</p>
+                        </div>
+                        {hasPostedRecently && topContent && (
+                          <div>
+                            <p className="text-gray-500 text-xs">Top content</p>
+                            <p className="text-white font-medium truncate">Provided</p>
+                          </div>
+                        )}
+                      </div>
+                      {selectedPillars.length > 0 && (
+                        <div>
+                          <p className="text-gray-500 text-xs mb-2">Pillars</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {selectedPillars.map((p) => (
+                              <span key={p} className="px-2.5 py-1 text-xs rounded-lg bg-teal-400/10 border border-teal-400/20 text-teal-400">{p}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
-          {/* Results */}
-          {plan && !generating && (
+                      {error && (
+                        <div className="p-3 rounded-xl bg-red-400/10 border border-red-400/20 text-red-400 text-sm">{error}</div>
+                      )}
+
+                      <button
+                        onClick={handleGenerate}
+                        className="w-full py-4 px-6 rounded-xl text-sm font-bold bg-teal-400 text-black hover:bg-teal-300 hover:shadow-[0_0_30px_rgba(45,212,191,0.4)] transition-all"
+                      >
+                        Generate Content Plan
+                        <span className="ml-2 text-xs opacity-75">({TOKEN_COST} tokens)</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </ChatQA>
+            </div>
+          ) : plan ? (
+            /* ─── Results View ─── */
             <div className="space-y-8">
               {/* Plan Header */}
               <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 md:p-8">
@@ -365,7 +648,6 @@ export default function LinkedInPlannerPage() {
                   </div>
                 </div>
 
-                {/* Funnel breakdown */}
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { stage: "TOFU", label: "Awareness", pct: plan.funnelBreakdown?.tofu || 0 },
@@ -381,6 +663,30 @@ export default function LinkedInPlannerPage() {
                 </div>
               </div>
 
+              {/* Generate All Posts */}
+              {plan.posts && plan.posts.length > 0 && (
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={handleGenerateAllPosts}
+                    disabled={generatingAll || Object.keys(generatedPosts).length === plan.posts.length}
+                    className={`px-6 py-3 rounded-xl text-sm font-bold transition-all ${
+                      generatingAll || Object.keys(generatedPosts).length === plan.posts.length
+                        ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                        : "bg-teal-400 text-black hover:bg-teal-300 hover:shadow-[0_0_30px_rgba(45,212,191,0.4)]"
+                    }`}
+                  >
+                    {generatingAll
+                      ? `Generating... ${generatingAllProgress}/${plan.posts.filter((p) => !generatedPosts[p.id]).length}`
+                      : Object.keys(generatedPosts).length === plan.posts.length
+                        ? "All Posts Generated"
+                        : `Generate All Posts (${plan.posts.filter((p) => !generatedPosts[p.id]).length * 3} tokens)`}
+                  </button>
+                  {Object.keys(generatedPosts).length > 0 && (
+                    <span className="text-xs text-gray-500">{Object.keys(generatedPosts).length}/{plan.posts.length} generated</span>
+                  )}
+                </div>
+              )}
+
               {/* Posts list */}
               <div className="space-y-3">
                 <h2 className="text-lg font-bold text-white mb-4">
@@ -394,26 +700,21 @@ export default function LinkedInPlannerPage() {
                         onClick={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
                         className="flex-1 flex items-start gap-4 text-left min-w-0"
                       >
-                        {/* Date */}
                         <div className="shrink-0 text-center w-12">
-                          <p className="text-xs font-semibold text-gray-600 uppercase">
-                            {post.dayOfWeek.slice(0, 3)}
-                          </p>
-                          <p className="text-xl font-bold text-white leading-none mt-0.5">
-                            {post.date.split("-")[2]}
-                          </p>
+                          <p className="text-xs font-semibold text-gray-600 uppercase">{post.dayOfWeek?.slice(0, 3)}</p>
+                          <p className="text-xl font-bold text-white leading-none mt-0.5">{post.date?.split("-")[2]}</p>
                         </div>
 
-                        {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${FUNNEL_COLOURS[post.funnel_stage]}`}>
-                              {post.funnel_stage}
-                            </span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${FUNNEL_COLOURS[post.funnel_stage]}`}>{post.funnel_stage}</span>
                             <span className="text-[10px] font-medium text-gray-500 bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-full">
                               {FORMAT_ICONS[post.format] || "◻"} {post.format}
                             </span>
                             <span className="text-[10px] text-gray-600">{post.posting_time}</span>
+                            {generatedPosts[post.id] && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-400/10 text-teal-400 border border-teal-400/20">Generated</span>
+                            )}
                           </div>
                           <p className="text-sm font-semibold text-white truncate">{post.title}</p>
                           <p className="text-xs text-gray-500 mt-0.5 italic truncate">&ldquo;{post.caption_hook}&rdquo;</p>
@@ -423,19 +724,12 @@ export default function LinkedInPlannerPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                         </svg>
                       </button>
-
-                      <button
-                        onClick={() => handleCopyPost(post)}
-                        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white/[0.06] border border-white/[0.08] text-gray-400 hover:text-white hover:border-white/20 transition-all shrink-0 mt-0.5"
-                      >
-                        {copiedPost === post.id ? "Copied!" : "Copy"}
-                      </button>
                     </div>
 
                     {expandedPost === post.id && (
                       <div className="border-t border-white/[0.06] p-5 md:p-6 space-y-5">
                         <div>
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Hook (before &ldquo;see more&rdquo;)</p>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Hook</p>
                           <p className="text-sm font-semibold text-white italic">&ldquo;{post.caption_hook}&rdquo;</p>
                         </div>
 
@@ -463,12 +757,61 @@ export default function LinkedInPlannerPage() {
                             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Hashtags</p>
                             <div className="flex flex-wrap gap-2">
                               {post.hashtags.map((tag, i) => (
-                                <span key={i} className="px-2.5 py-1 text-xs rounded-lg bg-white/[0.06] border border-white/[0.08] text-gray-400">
-                                  #{tag}
-                                </span>
+                                <span key={i} className="px-2.5 py-1 text-xs rounded-lg bg-white/[0.06] border border-white/[0.08] text-gray-400">#{tag}</span>
                               ))}
                             </div>
                           </div>
+                        )}
+
+                        {generatedPosts[post.id] && (
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Full Post</p>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-teal-400 font-bold">Score: {generatedPosts[post.id].writing_score}</span>
+                                <button
+                                  onClick={() => handleCopyPost(generatedPosts[post.id].full_post, post.id)}
+                                  className="px-3 py-1 text-xs font-semibold rounded-lg bg-teal-400/10 border border-teal-400/20 text-teal-400 hover:bg-teal-400/20 transition-all"
+                                >
+                                  {copiedPost === post.id ? "Copied!" : "Copy"}
+                                </button>
+                              </div>
+                            </div>
+                            <div className="bg-black/40 border border-white/10 rounded-xl p-4">
+                              <pre className="whitespace-pre-wrap text-sm text-gray-300 leading-relaxed font-[family-name:var(--font-geist-sans)]">
+                                {generatedPosts[post.id].full_post}
+                              </pre>
+                            </div>
+                          </div>
+                        )}
+
+                        {!generatedPosts[post.id] && (
+                          <button
+                            onClick={() => handleGeneratePost(post)}
+                            disabled={generatingPostId === post.id}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                              generatingPostId === post.id
+                                ? "bg-white/[0.04] border border-white/[0.06] text-gray-500"
+                                : "bg-white/[0.04] border border-white/[0.08] text-gray-400 hover:text-teal-400 hover:border-teal-400/30 hover:bg-teal-400/5"
+                            }`}
+                          >
+                            {generatingPostId === post.id ? (
+                              <>
+                                <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                                </svg>
+                                Generate Full Post (3 tokens)
+                              </>
+                            )}
+                          </button>
                         )}
                       </div>
                     )}
@@ -477,215 +820,13 @@ export default function LinkedInPlannerPage() {
               </div>
 
               <button
-                onClick={() => { setPlan(null); setError("") }}
+                onClick={handleReset}
                 className="px-6 py-3 text-sm font-semibold rounded-xl bg-white/[0.06] border border-white/[0.08] text-gray-400 hover:text-white hover:border-white/20 transition-all"
               >
-                ← Generate New Plan
+                ← New Plan
               </button>
             </div>
-          )}
-
-          {/* Form */}
-          {!plan && !generating && (
-            <div className="space-y-6">
-
-              {/* Month & Frequency */}
-              <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-6 md:p-8">
-                <h2 className="text-lg font-bold text-white mb-1">Plan Settings</h2>
-                <p className="text-sm text-gray-500 mb-6">Choose your month and posting frequency.</p>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Month</label>
-                    <input
-                      type="month"
-                      value={month}
-                      onChange={(e) => setMonth(e.target.value)}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Posts per Week</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {([3, 5] as PostingFrequency[]).map((freq) => (
-                        <button
-                          key={freq}
-                          onClick={() => setPostsPerWeek(freq)}
-                          className={`p-4 rounded-xl border text-center transition-all ${postsPerWeek === freq ? "border-teal-400/50 bg-teal-400/10 text-teal-400" : "border-white/[0.08] bg-white/[0.02] text-gray-400 hover:border-white/20"}`}
-                        >
-                          <p className="text-lg font-bold">{freq}x</p>
-                          <p className="text-xs opacity-70 mt-0.5">~{freq === 3 ? "12" : "20"} posts/month</p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Business Context */}
-              <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-6 md:p-8 space-y-5">
-                <div>
-                  <h2 className="text-lg font-bold text-white mb-1">Business Context</h2>
-                  <p className="text-sm text-gray-500">Tell us about your business so the plan fits your brand.</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Industry <span className="text-red-400">*</span></label>
-                  <input
-                    value={industry}
-                    onChange={(e) => setIndustry(e.target.value)}
-                    placeholder="e.g. Business Automation, Digital Marketing, Real Estate"
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Business Description</label>
-                  <textarea
-                    value={businessDescription}
-                    onChange={(e) => setBusinessDescription(e.target.value)}
-                    placeholder="Briefly describe what you do, who you help, and what makes you different."
-                    rows={3}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all resize-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Target Audience <span className="text-red-400">*</span></label>
-                  <input
-                    value={targetAudience}
-                    onChange={(e) => setTargetAudience(e.target.value)}
-                    placeholder="e.g. UK service business owners with 1-20 employees"
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Network Size</label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {AUDIENCE_SIZE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setAudienceSize(opt.value)}
-                        className={`p-3 rounded-xl border text-center transition-all ${audienceSize === opt.value ? "border-teal-400/50 bg-teal-400/10 text-teal-400" : "border-white/[0.08] bg-white/[0.02] text-gray-400 hover:border-white/20"}`}
-                      >
-                        <p className="text-xs font-bold">{opt.label}</p>
-                        <p className="text-[10px] opacity-60 mt-0.5">{opt.description}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Goal */}
-              <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-6 md:p-8 space-y-5">
-                <div>
-                  <h2 className="text-lg font-bold text-white mb-1">Content Goal</h2>
-                  <p className="text-sm text-gray-500">Your primary goal shapes the entire content strategy.</p>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {GOAL_OPTIONS.map((g) => (
-                    <button
-                      key={g}
-                      onClick={() => setGoals(g)}
-                      className={`p-4 rounded-xl border text-left transition-all ${goals === g ? "border-teal-400/50 bg-teal-400/10" : "border-white/[0.08] bg-white/[0.02] hover:border-white/20"}`}
-                    >
-                      <p className={`text-sm font-semibold ${goals === g ? "text-teal-400" : "text-white"}`}>{g}</p>
-                    </button>
-                  ))}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Desired Outcomes (optional)</label>
-                  <textarea
-                    value={desiredOutcomes}
-                    onChange={(e) => setDesiredOutcomes(e.target.value)}
-                    placeholder="e.g. Book 5 discovery calls per month, grow to 2K followers by Q3"
-                    rows={2}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all resize-none"
-                  />
-                </div>
-              </div>
-
-              {/* Formats */}
-              <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-6 md:p-8">
-                <h2 className="text-lg font-bold text-white mb-1">Post Formats</h2>
-                <p className="text-sm text-gray-500 mb-4">Select which post types to include in your plan.</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {FORMAT_OPTIONS.map((f) => (
-                    <button
-                      key={f.value}
-                      onClick={() => toggleFormat(f.value)}
-                      className={`text-left p-4 rounded-xl border transition-all ${selectedFormats.includes(f.value) ? "border-teal-400/50 bg-teal-400/10" : "border-white/[0.08] bg-white/[0.02] hover:border-white/20"}`}
-                    >
-                      <p className={`text-sm font-semibold ${selectedFormats.includes(f.value) ? "text-teal-400" : "text-white"}`}>{f.label}</p>
-                      <p className="text-xs text-gray-500 mt-1">{f.desc}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Content Pillars */}
-              <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-6 md:p-8">
-                <h2 className="text-lg font-bold text-white mb-1">Content Pillars</h2>
-                <p className="text-sm text-gray-500 mb-4">Choose 3–8 recurring topics that define your LinkedIn content.</p>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {PILLAR_SUGGESTIONS.map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => togglePillar(p)}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${pillars.includes(p) ? "border-teal-400/50 bg-teal-400/10 text-teal-400" : "border-white/[0.08] bg-white/[0.02] text-gray-400 hover:border-white/20"}`}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex gap-2">
-                  <input
-                    value={customPillar}
-                    onChange={(e) => setCustomPillar(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomPillar() } }}
-                    placeholder="Add custom pillar..."
-                    className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
-                  />
-                  <button
-                    onClick={addCustomPillar}
-                    disabled={!customPillar.trim() || pillars.length >= 8}
-                    className="px-4 py-2.5 text-sm font-semibold rounded-xl bg-teal-400/10 border border-teal-400/20 text-teal-400 hover:bg-teal-400/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Add
-                  </button>
-                </div>
-
-                {pillars.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {pillars.map((p) => (
-                      <span key={p} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-teal-400/10 border border-teal-400/20 text-teal-400">
-                        {p}
-                        <button onClick={() => togglePillar(p)} className="hover:text-white transition-colors">×</button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {error && (
-                <div role="alert" className="p-4 rounded-xl bg-red-400/10 border border-red-400/20 text-red-400 text-sm">{error}</div>
-              )}
-
-              <button
-                onClick={handleGenerate}
-                disabled={!canGenerate}
-                className={`w-full py-4 px-6 rounded-xl text-sm font-bold transition-all ${canGenerate ? "bg-teal-400 text-black hover:bg-teal-300 hover:shadow-[0_0_30px_rgba(45,212,191,0.4)]" : "bg-gray-700 text-gray-400 cursor-not-allowed"}`}
-              >
-                Generate Content Plan
-                <span className="ml-2 text-xs opacity-75">(25 tokens)</span>
-              </button>
-            </div>
-          )}
+          ) : null}
         </div>
       </main>
     </div>

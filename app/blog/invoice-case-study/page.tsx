@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 
 const articleSchema = {
@@ -165,9 +166,11 @@ export default function CaseStudy() {
                 </span>
               </div>
               <div className="overflow-hidden rounded-2xl border border-white/10">
-                <img
+                <Image
                   src="/case-studies/xero-image-1.webp"
                   alt="Xero before automation - £2,995 outstanding"
+                  width={600}
+                  height={400}
                   className="w-full"
                 />
               </div>
@@ -191,9 +194,11 @@ export default function CaseStudy() {
                 </span>
               </div>
               <div className="overflow-hidden rounded-2xl border border-teal-400/30">
-                <img
+                <Image
                   src="/case-studies/xero-image-2.webp"
                   alt="Xero after automation - £0 outstanding"
+                  width={600}
+                  height={400}
                   className="w-full"
                 />
               </div>

@@ -3,6 +3,9 @@ import Anthropic from "@anthropic-ai/sdk"
 import { createClient } from "@/app/lib/supabase/server"
 import { createAdminClient } from "@/app/lib/supabase/admin"
 import { checkRateLimit, resolveRequestActorId } from "@/app/lib/security/rate-limit"
+import { getUserFeedbackContext } from "@/app/lib/x-master-prompt"
+
+export const maxDuration = 120
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -10,7 +13,7 @@ const QUALITY_COSTS = { fast: 25, pro: 60 } as const
 const MAX_ATTEMPTS = { fast: 1, pro: 3 } as const
 
 const VALID_FUNNEL_STAGES = ["TOFU", "MOFU", "BOFU"] as const
-const VALID_FORMATS = ["Single Tweet", "Thread", "Poll"] as const
+const VALID_FORMATS = ["Single Tweet", "Thread", "Poll", "Article"] as const
 const VALID_QUALITY_MODES = ["fast", "pro"] as const
 const VALID_GOALS = [
   "Brand Awareness",
@@ -24,6 +27,12 @@ const THREAD_TYPES_BY_STAGE: Record<FunnelStage, string[]> = {
   TOFU: ["Hot Take", "Story", "Educational"],
   MOFU: ["Educational", "How-To", "Case Study"],
   BOFU: ["Social Proof", "Case Study", "Story"],
+}
+
+const ARTICLE_TYPES_BY_STAGE: Record<FunnelStage, string[]> = {
+  TOFU: [],
+  MOFU: ["Deep Dive", "Tutorial", "Framework"],
+  BOFU: ["Case Study", "Opinion"],
 }
 
 const POST_TYPES_BY_FORMAT_AND_STAGE: Record<string, Record<FunnelStage, string>> = {
@@ -41,6 +50,11 @@ const POST_TYPES_BY_FORMAT_AND_STAGE: Record<string, Record<FunnelStage, string>
     TOFU: "Debate Poll",
     MOFU: "Opinion Poll",
     BOFU: "Pain Point Poll",
+  },
+  Article: {
+    TOFU: "Authority Article",
+    MOFU: "Authority Article",
+    BOFU: "Case Study Article",
   },
 }
 
@@ -64,10 +78,12 @@ interface GeneratedPost {
   id: string
   date: string
   dayOfWeek: string
-  format: "Single Tweet" | "Thread" | "Poll"
+  format: "Single Tweet" | "Thread" | "Poll" | "Article"
   post_type: string
   thread_type?: string
   thread_tweet_count?: number
+  article_type?: string
+  article_length?: string
   funnel_stage: FunnelStage
   pillar: string
   hook: string
@@ -212,7 +228,23 @@ function buildDateSlots(month: string, total: number): { date: string; dayOfWeek
   })
 }
 
-function pickFormatForStage(stage: FunnelStage, index: number): "Single Tweet" | "Thread" | "Poll" {
+function buildWeekDateSlots(startDateStr: string, weeksCount: number, total: number): { date: string; dayOfWeek: string }[] {
+  const [sy, sm, sd] = startDateStr.split("-").map(Number)
+  const totalDays = weeksCount * 7
+  return Array.from({ length: total }, (_, i) => {
+    const dayOffset = Math.floor((i * totalDays) / total)
+    const d = new Date(Date.UTC(sy, sm - 1, sd + dayOffset))
+    const yyyy = d.getUTCFullYear()
+    const mm = String(d.getUTCMonth() + 1).padStart(2, "0")
+    const dd = String(d.getUTCDate()).padStart(2, "0")
+    return { date: `${yyyy}-${mm}-${dd}`, dayOfWeek: DAY_NAMES[d.getUTCDay()] }
+  })
+}
+
+function pickFormatForStage(stage: FunnelStage, index: number): "Single Tweet" | "Thread" | "Poll" | "Article" {
+  // Place an Article every ~6th slot, only in MOFU/BOFU (never TOFU)
+  if (stage !== "TOFU" && index % 6 === 4) return "Article"
+
   const prefs: Record<FunnelStage, Array<"Single Tweet" | "Thread" | "Poll">> = {
     TOFU: ["Single Tweet", "Poll", "Thread"],
     MOFU: ["Thread", "Single Tweet", "Thread"],
@@ -291,18 +323,46 @@ async function fetchProfileContext(
 
 // ─── Prompt builders ──────────────────────────────────────────────────────────
 
-function buildSystemPrompt(goal: string): string {
-  const normGoal = normaliseGoal(goal)
-  return `You are an elite X (Twitter) content strategist. Your sole mission: create a monthly content plan where EVERY post advances "${normGoal}".
+// Lightweight plan system prompt (Haiku-optimised — no massive writing formulas)
+const GOAL_CTA_MAP: Record<string, string> = {
+  "Brand Awareness": "Follow for more / Repost if this helped. NEVER sales CTAs.",
+  "Lead Generation": "DM me [keyword] / Comment [word] & I'll send you [thing]",
+  "Community Building": "What would you add? / Which surprised you most?",
+  "Sales & Conversions": "DM me [keyword] to get started / Link in bio to apply",
+  "Education & Authority": "Bookmark this / Follow for daily [niche] insights",
+}
 
-Before writing each post, ask: "How does THIS specific post move a real person closer to ${normGoal} on X?"
+function buildPlanSystemPrompt(goal: string, feedbackConstraints: string = ""): string {
+  return `You are an elite X (Twitter) content strategist. Create a content plan where EVERY post advances "${goal}".
+Before writing each hook, ask: "Would I bookmark this if someone else wrote it?" If not, make it stronger.
 
-X platform rules you must follow:
-- Single Tweet hooks must be under 280 characters
-- Threads use numbered tweets (1/ 2/ etc.) with a hook tweet first
-- Never start a hook with "I", the business name, or generic openers like "Today I want to..."
-- Polls must have 2–4 options that generate debate or reveal a pain point
+HOOK FORMULAS (pick one per post):
+1. EARNED SECRET: "I went from [X] to [Y] in [timeframe]. Here's exactly how:"
+2. INVERSION: "You don't need [popular belief]. You need [counterintuitive alternative]."
+3. HARD TRUTH: "Hard truth about [topic]: [uncomfortable reality nobody says aloud]"
+4. CURIOSITY GAP: "Why do [surprising observation]? The answer isn't what you think."
+5. WISH I KNEW: "[N] things I wish I knew about [topic] [X years] ago:"
+6. BOLD DECLARATION: "[Common advice] is wrong. Here's what actually works:"
+7. IDENTITY TARGET: "If you [specific condition], read this."
+8. PATTERN INTERRUPT: "[Bold declarative statement] Here's why:"
 
+AUTHORITY: Write as a practitioner sharing hard-won insights — specific numbers, earned angles, field notes voice. Never start with "I" or business name. Be specific: "3x" beats "much more".
+
+CONTENT QUALITY:
+- Genuinely valuable — not recycled advice. Fresh insights.
+- Immediately actionable — systems, not observations.
+- Easy to read — short sentences, simple language.
+- Each content_brief must be 100+ words with concrete angle and approach.
+
+Goal: ${goal}
+CTA style: ${GOAL_CTA_MAP[goal] || GOAL_CTA_MAP["Lead Generation"]}
+
+X PLATFORM RULES:
+- Single Tweet hooks under 280 chars
+- Threads: numbered tweets, hook tweet first, 5-12 tweets
+- Never start hook with "I", business name, or generic openers
+- Polls: 2-4 options that generate debate
+${feedbackConstraints}
 Output valid JSON only. No markdown fences. No commentary.`
 }
 
@@ -342,9 +402,11 @@ interface SlotBlueprint {
   dayOfWeek: string
   funnel_stage: FunnelStage
   pillar: string
-  format: "Single Tweet" | "Thread" | "Poll"
+  format: "Single Tweet" | "Thread" | "Poll" | "Article"
   post_type: string
   thread_type?: string
+  article_type?: string
+  article_length?: string
   primary_kpi: string
 }
 
@@ -359,6 +421,7 @@ function buildGenerationPrompt(params: {
   voiceContext: { tone: string; voiceSample: string; businessName: string; location: string; offers: string; usp: string; primaryCta: string; proofPoints: string; xHandle: string }
   slots: SlotBlueprint[]
   repairDirectives: string[]
+  topics: string[]
 }): string {
   const { month, postsPerWeek, goal, industry, businessDescription, targetAudience, qualityMode, voiceContext, slots, repairDirectives } = params
   const goalTactics = buildGoalTactics(goal)
@@ -396,12 +459,14 @@ RULES:
 2. hook: The scroll-stopping first line. Under 280 characters for Single Tweet. Never start with "I" or the business name.
 3. content_brief: 100+ words. What to say, the angle, what NOT to say, and exactly HOW this post advances the goal.
 4. For Thread format: set thread_tweet_count (5–12) and thread_type from slot.
-5. posting_time: HH:MM (24h) optimised for X algorithm — typically 7–9am or 6–9pm.
-6. why_it_works: The psychological mechanism for this funnel stage + goal.
-7. engagement_tip: A specific tactical instruction tied to primary_kpi. Not vague advice.
-8. goal_alignment: One sentence — the specific mindset shift this creates toward ${goal}.
-9. Vary hooks across all slots — no repeated angles or same opening words.
-10. For Poll format: include 4 poll options in content_brief.
+5. For Article format: set article_type and article_length from slot. The hook becomes the companion tweet teaser. content_brief should describe the article angle, key sections, and conclusion CTA in 150+ words.
+6. posting_time: HH:MM (24h) optimised for X algorithm — typically 7–9am or 6–9pm.
+7. why_it_works: The psychological mechanism for this funnel stage + goal.
+8. engagement_tip: A specific tactical instruction tied to primary_kpi. Not vague advice.
+9. goal_alignment: One sentence — the specific mindset shift this creates toward ${goal}.
+10. Vary hooks across all slots — no repeated angles or same opening words.
+11. For Poll format: include 4 poll options in content_brief.
+${params.topics.length > 0 ? `12. USER-REQUESTED TOPICS — The user wants these specific topics covered. Assign each to the most fitting slot (match funnel_stage and format). Make that slot's hook and content_brief directly about the specified topic:\n${params.topics.map((t, i) => `    ${i + 1}. "${t}"`).join("\n")}` : ""}
 ${repairSection}
 
 RESPONSE FORMAT (valid JSON only):
@@ -420,6 +485,8 @@ RESPONSE FORMAT (valid JSON only):
       "post_type": "Educational Thread",
       "thread_type": "Educational",
       "thread_tweet_count": 8,
+      "article_type": "Deep Dive (only for Article format)",
+      "article_length": "standard (only for Article format)",
       "funnel_stage": "MOFU",
       "pillar": "...",
       "hook": "the opening line / hook tweet",
@@ -452,6 +519,12 @@ function normaliseGeneratedPlan(params: {
     const threadType = typeof src.thread_type === "string"
       ? src.thread_type
       : (THREAD_TYPES_BY_STAGE[slot.funnel_stage][0])
+    const articleType = typeof src.article_type === "string"
+      ? src.article_type
+      : slot.article_type
+    const articleLength = typeof src.article_length === "string"
+      ? src.article_length
+      : (slot.article_length || "standard")
 
     return {
       id: `post-${i + 1}`,
@@ -463,6 +536,8 @@ function normaliseGeneratedPlan(params: {
       thread_tweet_count: format === "Thread"
         ? Math.min(12, Math.max(5, Number(src.thread_tweet_count) || 7))
         : undefined,
+      article_type: format === "Article" ? articleType : undefined,
+      article_length: format === "Article" ? articleLength : undefined,
       funnel_stage: slot.funnel_stage,
       pillar: cleanText(src.pillar, 120) || slot.pillar,
       hook: cleanText(src.hook, 280) || `Stop ignoring this ${slot.pillar} mistake.`,
@@ -496,22 +571,85 @@ function normaliseGeneratedPlan(params: {
   }
 }
 
-async function generateCandidate(params: {
+const BATCH_SIZE = 8 // posts per parallel batch — keeps Haiku reliable
+
+type CandidateParams = {
   month: string; postsPerWeek: number; goal: string; industry: string
   businessDescription: string; targetAudience: string; qualityMode: QualityMode
   voiceContext: { tone: string; voiceSample: string; businessName: string; location: string; offers: string; usp: string; primaryCta: string; proofPoints: string; xHandle: string }
-  slots: SlotBlueprint[]; repairDirectives: string[]
-}): Promise<GeneratedPlan | null> {
+  slots: SlotBlueprint[]; repairDirectives: string[]; feedbackConstraints: string; topics: string[]
+}
+
+async function callHaiku(params: CandidateParams): Promise<Record<string, unknown> | null> {
+  const scaledMaxTokens = Math.min(16000, Math.max(4000, params.slots.length * 600 + 1000))
+
   const message = await getAnthropic().messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 16000,
-    system: buildSystemPrompt(params.goal),
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: scaledMaxTokens,
+    system: buildPlanSystemPrompt(normaliseGoal(params.goal), params.feedbackConstraints),
     messages: [{ role: "user", content: buildGenerationPrompt(params) }],
   })
+  console.log(`[x-plan] Batch ${params.slots.length} posts — stop=${message.stop_reason}, usage=${JSON.stringify(message.usage)}`)
+
   const text = message.content[0]?.type === "text" ? message.content[0].text : ""
-  const parsed = safeJsonParse(text)
-  if (!parsed) return null
-  return normaliseGeneratedPlan({ raw: parsed, slots: params.slots, month: params.month, postsPerWeek: params.postsPerWeek })
+  return safeJsonParse(text) as Record<string, unknown> | null
+}
+
+async function generateCandidate(params: CandidateParams): Promise<GeneratedPlan | null> {
+  const totalSlots = params.slots.length
+  const t0 = Date.now()
+
+  // Small plans (≤ BATCH_SIZE): single call, get full metadata
+  if (totalSlots <= BATCH_SIZE) {
+    console.log(`[x-plan] Single batch: ${totalSlots} posts`)
+    const parsed = await callHaiku(params)
+    if (!parsed) return null
+    console.log(`[x-plan] Done in ${Date.now() - t0}ms`)
+    return normaliseGeneratedPlan({ raw: parsed, slots: params.slots, month: params.month, postsPerWeek: params.postsPerWeek })
+  }
+
+  // Large plans: split into parallel batches
+  const batches: { slots: SlotBlueprint[]; topics: string[] }[] = []
+  let topicIdx = 0
+  for (let i = 0; i < totalSlots; i += BATCH_SIZE) {
+    const batchSlots = params.slots.slice(i, i + BATCH_SIZE)
+    const batchTopics: string[] = []
+    for (const _slot of batchSlots) {
+      if (topicIdx < params.topics.length) {
+        batchTopics.push(params.topics[topicIdx])
+        topicIdx++
+      }
+    }
+    batches.push({ slots: batchSlots, topics: batchTopics })
+  }
+
+  console.log(`[x-plan] Parallel: ${totalSlots} posts in ${batches.length} batches`)
+
+  const batchResults = await Promise.all(
+    batches.map(batch =>
+      callHaiku({ ...params, slots: batch.slots, topics: batch.topics })
+    )
+  )
+
+  // Merge posts from all batches
+  const allRawPosts: unknown[] = []
+  let metadata: Record<string, unknown> = {}
+  for (const [i, result] of batchResults.entries()) {
+    if (!result) continue
+    const posts = Array.isArray(result.posts) ? result.posts : []
+    allRawPosts.push(...posts)
+    // Use first batch's metadata for the plan
+    if (i === 0) metadata = result
+  }
+
+  console.log(`[x-plan] All batches done in ${Date.now() - t0}ms — ${allRawPosts.length} raw posts`)
+
+  return normaliseGeneratedPlan({
+    raw: { ...metadata, posts: allRawPosts },
+    slots: params.slots,
+    month: params.month,
+    postsPerWeek: params.postsPerWeek,
+  })
 }
 
 // ─── Route handler ────────────────────────────────────────────────────────────
@@ -521,8 +659,10 @@ export async function POST(request: NextRequest) {
   const admin = createAdminClient()
 
   try {
+    const t0 = Date.now()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    console.log(`[x-plan] Auth: ${Date.now() - t0}ms`)
 
     const actorId = resolveRequestActorId({ userId: user.id, forwardedFor: request.headers.get("x-forwarded-for"), fallback: "x-plan" })
     const rate = checkRateLimit(`generate-x-plan:${actorId}`, { max: 6, windowMs: 60_000 })
@@ -535,30 +675,49 @@ export async function POST(request: NextRequest) {
 
     const body = (await request.json()) as Record<string, unknown>
     const postsPerWeek = Number(body.postsPerWeek)
-    const month = cleanText(body.month, 7)
+    const rawWeeksCount = body.weeksCount ? Math.min(4, Math.max(1, Number(body.weeksCount))) : null
     const industry = cleanText(body.industry, 100)
     const businessDescription = cleanText(body.businessDescription, 500)
     const targetAudience = cleanText(body.targetAudience, 500)
     const goals = cleanText(body.goals, 100)
     const contentPillars = cleanList(body.contentPillars, 8, 100)
+    const topics = cleanList(body.topics, 100, 200)
     const qualityMode = parseQualityMode(body.qualityMode)
 
-    if (![3, 5, 7].includes(postsPerWeek)) return NextResponse.json({ error: "postsPerWeek must be 3, 5, or 7" }, { status: 400 })
-    if (!/^\d{4}-\d{2}$/.test(month)) return NextResponse.json({ error: "month must be YYYY-MM" }, { status: 400 })
-    if (!industry || !targetAudience || !goals) return NextResponse.json({ error: "industry, targetAudience, and goals are required" }, { status: 400 })
+    // Derive month: from body or from today (when using weeksCount)
+    const todayUTC = new Date()
+    const todayStr = `${todayUTC.getUTCFullYear()}-${String(todayUTC.getUTCMonth() + 1).padStart(2, "0")}-${String(todayUTC.getUTCDate()).padStart(2, "0")}`
+    const derivedMonth = cleanText(body.month, 7) || todayStr.slice(0, 7)
+    const month = /^\d{4}-\d{2}$/.test(derivedMonth) ? derivedMonth : todayStr.slice(0, 7)
+
+    if (![3, 5, 7, 14].includes(postsPerWeek)) return NextResponse.json({ error: "postsPerWeek must be 3, 5, 7, or 14" }, { status: 400 })
+    if (!goals) return NextResponse.json({ error: "goals is required" }, { status: 400 })
+    const safeIndustry = industry || "Business services"
+    const safeTargetAudience = targetAudience || "Business professionals and entrepreneurs"
 
     const tokenCost = QUALITY_COSTS[qualityMode]
 
-    const daysInMonth = getDaysInMonth(month)
-    const [y, m] = month.split("-").map(Number)
-    const firstDayOfWeek = (new Date(y, m - 1, 1).getDay() + 6) % 7
-    const calendarWeeks = Math.ceil((daysInMonth + firstDayOfWeek) / 7)
-    const exactPosts = postsPerWeek * calendarWeeks
+    let exactPosts: number
+    let dateSlots: { date: string; dayOfWeek: string }[]
+
+    if (rawWeeksCount) {
+      exactPosts = postsPerWeek * rawWeeksCount
+      dateSlots = buildWeekDateSlots(todayStr, rawWeeksCount, exactPosts)
+    } else {
+      const daysInMonth = getDaysInMonth(month)
+      const [y, m] = month.split("-").map(Number)
+      const firstDayOfWeek = (new Date(y, m - 1, 1).getDay() + 6) % 7
+      const calendarWeeks = Math.ceil((daysInMonth + firstDayOfWeek) / 7)
+      exactPosts = postsPerWeek * calendarWeeks
+      dateSlots = buildDateSlots(month, exactPosts)
+    }
+
+    // Clamp topics to the number of posts
+    const safeTopics = topics.slice(0, exactPosts)
 
     const funnelMix = normaliseMix(goals)
     const stageCounts = allocateStageCounts(exactPosts, funnelMix)
     const stageSequence = buildStageSequence(exactPosts, stageCounts)
-    const dateSlots = buildDateSlots(month, exactPosts)
 
     const safePillars = contentPillars.length > 0 ? contentPillars : ["Tips & Insights", "Client Results", "Behind the Scenes"]
 
@@ -566,6 +725,10 @@ export async function POST(request: NextRequest) {
       const format = pickFormatForStage(stage, i)
       const postType = POST_TYPES_BY_FORMAT_AND_STAGE[format][stage]
       const threadType = format === "Thread" ? THREAD_TYPES_BY_STAGE[stage][i % THREAD_TYPES_BY_STAGE[stage].length] : undefined
+      const articleTypes = ARTICLE_TYPES_BY_STAGE[stage]
+      const articleType = format === "Article" && articleTypes.length > 0
+        ? articleTypes[i % articleTypes.length]
+        : undefined
 
       return {
         id: `slot-${i + 1}`,
@@ -576,11 +739,18 @@ export async function POST(request: NextRequest) {
         format,
         post_type: postType,
         thread_type: threadType,
+        article_type: articleType,
+        article_length: format === "Article" ? "standard" : undefined,
         primary_kpi: KPI_BY_STAGE[stage],
       }
     })
 
-    const profile = await fetchProfileContext(supabase, user.id)
+    console.log(`[x-plan] Setup: ${Date.now() - t0}ms, ${exactPosts} posts, ${qualityMode} mode`)
+    const [profile, feedbackConstraints] = await Promise.all([
+      fetchProfileContext(supabase, user.id),
+      getUserFeedbackContext(user.id),
+    ])
+    console.log(`[x-plan] Profile+feedback fetched: ${Date.now() - t0}ms`)
     const voiceContext = {
       tone: cleanText(profile?.tone, 120),
       voiceSample: cleanText(profile?.voice_sample, 2500),
@@ -601,8 +771,8 @@ export async function POST(request: NextRequest) {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       const repairDirectives = bestQuality?.gaps || []
       const plan = await generateCandidate({
-        month, postsPerWeek, goal: goals, industry, businessDescription, targetAudience,
-        qualityMode, voiceContext, slots, repairDirectives,
+        month, postsPerWeek, goal: goals, industry: safeIndustry, businessDescription, targetAudience: safeTargetAudience,
+        qualityMode, voiceContext, slots, repairDirectives, feedbackConstraints, topics: safeTopics,
       })
       if (!plan) { attempts.push({ attempt, overall: 0, pass: false }); continue }
 
@@ -616,6 +786,7 @@ export async function POST(request: NextRequest) {
       if (quality.pass) break
     }
 
+    console.log(`[x-plan] Generation done: ${Date.now() - t0}ms, best=${bestQuality?.overall ?? 0}`)
     if (!bestPlan || !bestQuality) return NextResponse.json({ error: "Failed to generate content plan" }, { status: 500 })
 
     const { data: newBalance, error: debitError } = await admin.rpc("debit_tokens", {
@@ -635,8 +806,8 @@ export async function POST(request: NextRequest) {
     const planPayload = {
       user_id: user.id,
       month,
-      industry,
-      target_audience: targetAudience,
+      industry: safeIndustry,
+      target_audience: safeTargetAudience,
       goals,
       quality_mode: qualityMode,
       platform: "x",
@@ -666,6 +837,8 @@ export async function POST(request: NextRequest) {
           post_type: p.post_type,
           thread_type: p.thread_type,
           thread_tweet_count: p.thread_tweet_count,
+          article_type: p.article_type,
+          article_length: p.article_length,
           content_brief: p.content_brief,
           why_it_works: p.why_it_works,
           engagement_tip: p.engagement_tip,

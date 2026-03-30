@@ -364,9 +364,6 @@ export default function SEOCaptionsPage() {
               <a href="/dashboard/instagram" className="flex-1 py-2.5 px-2 text-sm font-semibold text-center rounded-lg text-gray-500 hover:text-gray-300 transition-all">
                 Generate
               </a>
-              <a href="/dashboard/instagram/planner" className="flex-1 py-2.5 px-2 text-sm font-semibold text-center rounded-lg text-gray-500 hover:text-gray-300 transition-all">
-                Plan
-              </a>
               <span className="flex-1 py-2.5 px-2 text-sm font-semibold text-center rounded-lg bg-teal-400/10 text-teal-400 border border-teal-400/20">
                 Captions
               </span>

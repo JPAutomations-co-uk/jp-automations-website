@@ -469,7 +469,6 @@ export default function AdCreativesPage() {
             {/* Engine Tab Navigation */}
             <div className="flex gap-1 p-1 bg-white/[0.03] border border-white/[0.08] rounded-xl mb-6 max-w-2xl">
               <a href="/dashboard/instagram" className="flex-1 py-2.5 px-2 text-sm font-semibold text-center rounded-lg text-gray-500 hover:text-gray-300 transition-all">Generate</a>
-              <a href="/dashboard/instagram/planner" className="flex-1 py-2.5 px-2 text-sm font-semibold text-center rounded-lg text-gray-500 hover:text-gray-300 transition-all">Plan</a>
               <a href="/dashboard/instagram/captions" className="flex-1 py-2.5 px-2 text-sm font-semibold text-center rounded-lg text-gray-500 hover:text-gray-300 transition-all">Captions</a>
               <span className="flex-1 py-2.5 px-2 text-sm font-semibold text-center rounded-lg bg-teal-400/10 text-teal-400 border border-teal-400/20">Ads</span>
               <a href="/dashboard/instagram/reels" className="flex-1 py-2.5 px-2 text-sm font-semibold text-center rounded-lg text-gray-500 hover:text-gray-300 transition-all">Reels</a>

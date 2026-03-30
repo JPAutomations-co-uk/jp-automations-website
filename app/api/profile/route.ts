@@ -17,12 +17,17 @@ const EDITABLE_FIELDS = [
   "secondary_color",
   "voice_sample",
   // Extended onboarding fields
+  "goals",
+  "desired_outcomes",
+  "content_pillars",
+  "business_description",
   "x_handle",
   "linkedin_handle",
   "offers",
   "usp",
   "primary_cta",
   "proof_points",
+  "use_case",
   "onboarding_complete",
 ] as const
 
@@ -43,7 +48,7 @@ export async function GET() {
   const { data: fullData, error: fullError } = await supabase
     .from("profiles")
     .select(
-      "display_name, business_name, website_url, instagram_handle, industry, location, target_audience, brand_voice, tone, visual_style, primary_color, secondary_color, voice_sample, x_handle, linkedin_handle, offers, usp, primary_cta, proof_points, onboarding_complete, subscription_tier, subscription_status"
+      "display_name, business_name, business_description, website_url, instagram_handle, industry, location, target_audience, brand_voice, tone, visual_style, primary_color, secondary_color, voice_sample, x_handle, linkedin_handle, offers, usp, primary_cta, proof_points, use_case, goals, desired_outcomes, content_pillars, onboarding_complete, subscription_tier, subscription_status"
     )
     .eq("id", user.id)
     .single()
@@ -59,7 +64,7 @@ export async function GET() {
   const { data: fallbackData, error: fallbackError } = await supabase
     .from("profiles")
     .select(
-      "display_name, business_name, website_url, instagram_handle, industry, location, target_audience, brand_voice, tone, visual_style, primary_color, secondary_color, x_handle, linkedin_handle, offers, usp, primary_cta, proof_points, onboarding_complete, subscription_tier, subscription_status"
+      "display_name, business_name, website_url, instagram_handle, industry, location, target_audience, brand_voice, tone, visual_style, primary_color, secondary_color, x_handle, linkedin_handle, offers, usp, primary_cta, proof_points, content_pillars, onboarding_complete, subscription_tier, subscription_status"
     )
     .eq("id", user.id)
     .single()
@@ -109,31 +114,34 @@ export async function PUT(request: NextRequest) {
   }
 
   const admin = createAdminClient()
+
+  // Strip columns that are known to be missing in some environments
+  const safeUpdates = { ...updates }
+  const knownOptionalColumns = ["voice_sample", "use_case"]
+
   const { error } = await admin
     .from("profiles")
-    .update(updates as never)
-    .eq("id", user.id)
-
-  if (isMissingColumnError(error, "voice_sample") && "voice_sample" in updates) {
-    const fallbackUpdates = { ...updates }
-    delete fallbackUpdates.voice_sample
-
-    const { error: retryError } = await admin
-      .from("profiles")
-      .update(fallbackUpdates as never)
-      .eq("id", user.id)
-
-    if (!retryError) {
-      return NextResponse.json({ success: true, warning: "voice_sample column missing in DB; value not saved" })
-    }
-
-    console.error("Profile update retry error:", retryError)
-    return NextResponse.json({ error: "Failed to update profile" }, { status: 500 })
-  }
+    .upsert({ id: user.id, email: user.email, ...safeUpdates } as never, { onConflict: "id" })
 
   if (error) {
-    console.error("Profile update error:", error)
-    return NextResponse.json({ error: "Failed to update profile" }, { status: 500 })
+    // Strip any missing optional columns and retry once
+    const stripped = knownOptionalColumns.filter((col) => isMissingColumnError(error, col) && col in safeUpdates)
+    if (stripped.length > 0) {
+      stripped.forEach((col) => delete safeUpdates[col])
+      const { error: retryError } = await admin
+        .from("profiles")
+        .upsert({ id: user.id, email: user.email, ...safeUpdates } as never, { onConflict: "id" })
+
+      if (!retryError) {
+        return NextResponse.json({ success: true, warning: `Columns not in DB schema skipped: ${stripped.join(", ")}` })
+      }
+
+      console.error("Profile upsert retry error:", retryError)
+      return NextResponse.json({ error: retryError.message || "Failed to update profile" }, { status: 500 })
+    }
+
+    console.error("Profile upsert error:", error)
+    return NextResponse.json({ error: error.message || "Failed to update profile" }, { status: 500 })
   }
 
   return NextResponse.json({ success: true })

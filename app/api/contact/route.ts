@@ -2,6 +2,7 @@ import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import { logToSheet } from '@/app/lib/log-to-sheet'
 import { addToLoops } from '@/app/lib/loops'
+import { tryEnrollSequence } from '@/app/lib/email-suppression'
 
 function daysFromNow(days: number): string {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
@@ -65,6 +66,9 @@ JP
 P.S. While you wait, the blog has case studies and frameworks that might be relevant to whatever you're working through. jpautomations.co.uk/blog`,
     }).catch((err) => console.error('Contact auto-reply error:', err))
 
+    const shouldNurture = await tryEnrollSequence(email, 'contact')
+
+    if (shouldNurture) {
     // ── Follow-up if no reply: Day 3 ────────────────────────────────────────
     resend.emails.send({
       from: `JP <${fromEmail}>`,
@@ -77,6 +81,7 @@ JP
 
 P.S. If you were exploring whether we could help with your business specifically, the fastest way to find out is a 30-minute call — no pitch, just a diagnostic. jpautomations.co.uk/book-call`,
     }).catch((err) => console.error('Contact follow-up error:', err))
+    }
 
     return NextResponse.json({ success: true })
   } catch (err) {

@@ -9,6 +9,9 @@ type RateLimitResult = {
   remaining: number
 }
 
+// TODO: Replace in-memory store with Upstash Redis (@upstash/ratelimit)
+// for distributed rate limiting across serverless instances.
+// In-memory store resets on each deploy and is per-instance only.
 declare global {
   var __jpRateLimitStore: Map<string, number[]> | undefined
 }

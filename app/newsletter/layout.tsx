@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://www.jpautomations.co.uk/api/og?title=The+AI+Edge&subtitle=Free+Weekly+Newsletter+%E2%80%94+JP+Automations",
+        url: "https://www.jpautomations.co.uk/og-newsletter.png",
         width: 1200,
         height: 630,
         alt: "The AI Edge — Free Weekly Newsletter | JP Automations",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     description:
       "One actionable AI automation system every week you can plug straight into your service business.",
     images: [
-      "https://www.jpautomations.co.uk/api/og?title=The+AI+Edge&subtitle=Free+Weekly+Newsletter+%E2%80%94+JP+Automations",
+      "https://www.jpautomations.co.uk/og-newsletter.png",
     ],
   },
 }

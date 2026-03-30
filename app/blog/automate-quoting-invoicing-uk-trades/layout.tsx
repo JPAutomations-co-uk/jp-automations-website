@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     canonical: "https://www.jpautomations.co.uk/blog/automate-quoting-invoicing-uk-trades",
   },
   robots: {
-    index: false,
+    index: true,
     follow: false,
   },
   openGraph: {

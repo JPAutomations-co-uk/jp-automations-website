@@ -35,7 +35,7 @@ export default function OnboardingStep2() {
       title="Your market"
       subtitle="Help us understand who you serve — this shapes every piece of content we create."
       step={2}
-      totalSteps={5}
+      totalSteps={6}
     >
       <div className="space-y-5 max-w-md mx-auto text-left">
         <div>

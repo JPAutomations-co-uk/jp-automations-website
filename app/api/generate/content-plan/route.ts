@@ -739,6 +739,7 @@ function buildGenerationPrompt(params: {
   }
   slots: SlotBlueprint[]
   repairDirectives: string[]
+  provenHooks: string[]
 }): string {
   const {
     month,
@@ -754,6 +755,7 @@ function buildGenerationPrompt(params: {
     voiceContext,
     slots,
     repairDirectives,
+    provenHooks,
   } = params
 
   const repairSection = repairDirectives.length
@@ -796,7 +798,10 @@ VOICE LOCK:
 - Primary CTA: ${voiceContext.primaryCta || "Not provided"}
 - Proof Points: ${voiceContext.proofPoints || "Not provided"}
 - Voice Sample: ${voiceContext.voiceSample || "No voice sample provided — write in a direct, expert tone"}
-
+${provenHooks.length > 0 ? `
+PROVEN HOOKS FROM YOUR NICHE (real Instagram hooks with high engagement — use these as INSPIRATION for caption_hook values. Adapt them to match the business voice and each post's funnel stage. Do not copy them verbatim, but use the same patterns, structures, and emotional triggers):
+${provenHooks.map((h, i) => `${i + 1}. "${h}"`).join("\n")}
+` : ""}
 SLOT BLUEPRINTS (MUST KEEP THESE FIELDS EXACT):
 ${JSON.stringify(slots, null, 2)}
 
@@ -1291,6 +1296,7 @@ async function generateCandidate(params: {
   repairDirectives: string[]
   enabledFormats: string[]
   allowedPillars: string[]
+  provenHooks: string[]
 }): Promise<GeneratedPlan | null> {
   const message = await getAnthropic().messages.create({
     model: "claude-sonnet-4-6",
@@ -1369,6 +1375,7 @@ export async function POST(request: NextRequest) {
     const enabledFormats = cleanList(body.enabledFormats, 8, 100).filter((f) =>
       VALID_FORMATS.includes(f as (typeof VALID_FORMATS)[number])
     )
+    const provenHooks = cleanList(body.provenHooks, 15, 250)
 
     if (![3, 5, 7].includes(postsPerWeek)) {
       return NextResponse.json({ error: "postsPerWeek must be 3, 5, or 7" }, { status: 400 })
@@ -1499,6 +1506,7 @@ export async function POST(request: NextRequest) {
         repairDirectives,
         enabledFormats: safeFormats,
         allowedPillars: safePillars,
+        provenHooks,
       })
 
       if (!plan) {

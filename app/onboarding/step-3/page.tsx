@@ -4,6 +4,14 @@ import { useRouter } from "next/navigation"
 import { useOnboarding } from "@/app/components/OnboardingFormContext"
 import FormStepLayout from "@/app/components/FormStepLayout"
 
+const GOAL_OPTIONS = [
+  { value: "Lead Generation", desc: "Get enquiries, DMs, and calls" },
+  { value: "Brand Awareness", desc: "Reach new people and grow your audience" },
+  { value: "Thought Leadership", desc: "Build expert reputation in your niche" },
+  { value: "Sales & Conversions", desc: "Turn followers into paying clients" },
+  { value: "Community Building", desc: "Build genuine connections and engagement" },
+]
+
 export default function OnboardingStep3() {
   const router = useRouter()
   const { data, updateField } = useOnboarding()
@@ -14,10 +22,10 @@ export default function OnboardingStep3() {
 
   return (
     <FormStepLayout
-      title="Your offers"
-      subtitle="What you sell and what makes you the obvious choice. This goes into every prompt we send."
+      title="Your offers & goals"
+      subtitle="What you sell, what makes you different, and what you want your content to achieve."
       step={3}
-      totalSteps={5}
+      totalSteps={6}
     >
       <div className="space-y-6 max-w-md mx-auto text-left">
         <div>
@@ -27,7 +35,7 @@ export default function OnboardingStep3() {
             placeholder="e.g. I run a social media content service for service businesses. £997/month. Clients get a full month of content — captions, reels scripts, and carousels — planned and written for them each week."
             value={data.offers}
             onChange={(e) => updateField("offers", e.target.value)}
-            rows={5}
+            rows={4}
             className="w-full bg-black/40 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all resize-none text-sm leading-relaxed"
           />
         </div>
@@ -54,6 +62,42 @@ export default function OnboardingStep3() {
             className="w-full bg-black/40 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all text-sm"
           />
           <p className="text-xs text-gray-600 mt-1.5">This becomes the default CTA across your generated content.</p>
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-400 mb-2">Primary content goal</label>
+          <div className="grid grid-cols-1 gap-2">
+            {GOAL_OPTIONS.map((g) => (
+              <button
+                key={g.value}
+                type="button"
+                onClick={() => updateField("goals", g.value)}
+                className={`flex flex-col text-left px-4 py-3.5 rounded-xl border transition-all ${
+                  data.goals === g.value
+                    ? "border-teal-400 bg-teal-400/10"
+                    : "border-white/10 bg-black/40 hover:border-teal-400/50"
+                }`}
+              >
+                <span className={`text-sm font-semibold ${data.goals === g.value ? "text-teal-400" : "text-white"}`}>
+                  {g.value}
+                </span>
+                <span className="text-xs text-gray-600 mt-0.5">{g.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-400 mb-1">
+            What outcomes are you working toward? <span className="text-gray-600 font-normal">(optional)</span>
+          </label>
+          <textarea
+            placeholder="e.g. Book 5 discovery calls per month, grow to 2K followers by Q3, get 10 inbound leads per week"
+            value={data.desiredOutcomes}
+            onChange={(e) => updateField("desiredOutcomes", e.target.value)}
+            rows={2}
+            className="w-full bg-black/40 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all resize-none text-sm leading-relaxed"
+          />
         </div>
 
         <div className="flex gap-3">

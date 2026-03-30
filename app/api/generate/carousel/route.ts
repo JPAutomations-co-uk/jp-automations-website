@@ -120,18 +120,23 @@ export async function POST(request: NextRequest) {
       })
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err)
+      console.error("Carousel generation inner error:", message, err)
       if (message.includes("Insufficient")) {
         return NextResponse.json(
           { error: "Insufficient tokens", balance_needed: TOKEN_COST },
           { status: 402 }
         )
       }
-      throw err
+      return NextResponse.json(
+        { error: `Carousel generation failed: ${message}` },
+        { status: 500 }
+      )
     }
   } catch (error) {
-    console.error("Carousel generation error:", error)
+    const message = error instanceof Error ? error.message : String(error)
+    console.error("Carousel generation error:", message, error)
     return NextResponse.json(
-      { error: "Failed to generate carousel" },
+      { error: `Failed to generate carousel: ${message}` },
       { status: 500 }
     )
   }

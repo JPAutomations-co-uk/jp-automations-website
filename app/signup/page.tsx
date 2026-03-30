@@ -20,7 +20,8 @@ function SignupForm() {
 
   const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "")
   const emailRedirectBase = configuredSiteUrl || window.location.origin
-  const emailRedirectTo = `${emailRedirectBase}/auth/callback?next=${encodeURIComponent(safeRedirectPath)}`
+  // New signups always go to onboarding first — auth callback will check if it's already done
+  const emailRedirectTo = `${emailRedirectBase}/auth/callback?next=${encodeURIComponent("/onboarding")}`
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,7 +49,8 @@ function SignupForm() {
     }
 
     if (data.session) {
-      router.push(safeRedirectPath)
+      // New signup — go straight to onboarding
+      router.push("/onboarding")
       return
     }
 
@@ -58,7 +60,8 @@ function SignupForm() {
     })
 
     if (!signInError) {
-      router.push(safeRedirectPath)
+      // New signup — go straight to onboarding
+      router.push("/onboarding")
       return
     }
 

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     canonical: "https://www.jpautomations.co.uk/blog/whatsapp-automation-uk-service-businesses",
   },
   robots: {
-    index: false,
+    index: true,
     follow: false,
   },
   openGraph: {

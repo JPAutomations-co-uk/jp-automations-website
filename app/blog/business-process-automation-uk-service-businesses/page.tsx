@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 
 const articleSchema = {
@@ -60,9 +61,12 @@ export default function Page() {
         {/* Blog Hero Image */}
         <div className="mb-16">
           <div className="relative overflow-hidden rounded-3xl border border-white/10">
-            <img
+            <Image
               src="/blog/business-process-automation.webp"
               alt="5 business processes every UK service business should automate"
+              width={1200}
+              height={750}
+              priority
               className="w-full aspect-[16/10] object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />

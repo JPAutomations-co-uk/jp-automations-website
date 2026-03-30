@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     canonical: "https://www.jpautomations.co.uk/blog/ai-automation-roofing-companies-uk",
   },
   robots: {
-    index: false,
+    index: true,
     follow: false,
   },
   openGraph: {

@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 
 const articleSchema = {
@@ -52,9 +53,12 @@ export default function BlogPost() {
       {/* Blog Hero Image */}
 <div className="mb-16">
   <div className="relative overflow-hidden rounded-3xl border border-white/10">
-    <img
+    <Image
       src="/blog/business-systems.webp"
-      alt="The biggest automation mistakes service businesses make"
+      alt="The 3 systems every scalable service business needs"
+      width={1200}
+      height={750}
+      priority
       className="w-full aspect-[16/10] object-cover"
     />
     {/* Subtle gradient overlay */}

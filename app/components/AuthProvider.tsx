@@ -42,17 +42,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(user)
       if (user) refreshBalance()
       setLoading(false)
+    }).catch(() => {
+      setLoading(false)
     })
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) refreshBalance()
-      else setTokenBalance(0)
-    })
+    let subscription: { unsubscribe: () => void } | null = null
+    try {
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user ?? null)
+        if (session?.user) refreshBalance()
+        else setTokenBalance(0)
+      })
+      subscription = data.subscription
+    } catch {
+      // Auth listener failed — non-critical on public pages
+    }
 
-    return () => subscription.unsubscribe()
+    return () => subscription?.unsubscribe()
   }, [supabase.auth, refreshBalance])
 
   return (

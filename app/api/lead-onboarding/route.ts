@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { logToSheet } from '@/app/lib/log-to-sheet'
 import { addToLoops } from '@/app/lib/loops'
+import { tryEnrollSequence } from '@/app/lib/email-suppression'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID || ''
@@ -30,6 +32,12 @@ export async function POST(request: NextRequest) {
 
     addToLoops({ email, firstName, source: 'onboarding-system' })
 
+    logToSheet('Lead Magnets', {
+      Timestamp: new Date().toISOString(),
+      Name: name,
+      Email: email,
+    })
+
     // ── Delivery email (instant) ────────────────────────────────────────────
     const { error: resendError } = await resend.emails.send({
       from: 'JP <contact@jpautomations.co.uk>',
@@ -49,6 +57,9 @@ P.S. Start with the intake form questions — those are the foundation everythin
       return NextResponse.json({ error: resendError.message }, { status: 500 })
     }
 
+    const shouldNurture = await tryEnrollSequence(email, 'onboarding')
+
+    if (shouldNurture) {
     // ── Nurture Email 1: Day 2 ──────────────────────────────────────────────
     resend.emails.send({
       from: 'JP <contact@jpautomations.co.uk>',
@@ -105,6 +116,7 @@ JP
 
 P.S. And if you'd rather keep building it yourself, the automation blueprint is probably the most useful next step — the full framework for deciding what to build and in what order. jpautomations.co.uk/free-blueprint`,
     }).catch((err) => console.error('Nurture email 3 error:', err))
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

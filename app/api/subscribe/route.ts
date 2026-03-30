@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { logToSheet } from '@/app/lib/log-to-sheet'
 import { addToLoops } from '@/app/lib/loops'
+import { tryEnrollSequence } from '@/app/lib/email-suppression'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID || ''
@@ -64,6 +65,9 @@ JP
 P.S. I wrote the full framework for finding and fixing these into a guide — The Automation Blueprint. Worth 30 minutes if you want the structured version. jpautomations.co.uk/free-blueprint`,
     })
 
+    const shouldNurture = await tryEnrollSequence(email, 'newsletter')
+
+    if (shouldNurture) {
     // ── Welcome Email 2: Day 3 ──────────────────────────────────────────────
     await resend.emails.send({
       from: 'JP <contact@jpautomations.co.uk>',
@@ -120,6 +124,7 @@ JP
 
 P.S. I built this into a ready-to-use system with the brief template, AI prompts for each document, and the folder structure to keep it organised. jpautomations.co.uk/free-client-folder`,
     })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

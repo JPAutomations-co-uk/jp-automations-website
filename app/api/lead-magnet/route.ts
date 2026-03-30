@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { logToSheet } from '@/app/lib/log-to-sheet'
 import { addToLoops } from '@/app/lib/loops'
+import { tryEnrollSequence } from '@/app/lib/email-suppression'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID || ''
@@ -60,6 +61,9 @@ P.S. This covers the two-rule test, the 30-minute audit, and 5 proven workflows.
       return NextResponse.json({ error: resendError.message }, { status: 500 })
     }
 
+    const shouldNurture = await tryEnrollSequence(email, 'blueprint')
+
+    if (shouldNurture) {
     // ── Nurture Email 1: Day 2 ──────────────────────────────────────────────
     resend.emails.send({
       from: 'JP <contact@jpautomations.co.uk>',
@@ -116,6 +120,7 @@ JP
 
 P.S. And if you'd rather keep building it yourself, the prompt engineering guide is probably the most useful next step — it's the skill that makes every AI tool you use 10x better. jpautomations.co.uk/free-prompt-guide`,
     }).catch((err) => console.error('Nurture email 3 error:', err))
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

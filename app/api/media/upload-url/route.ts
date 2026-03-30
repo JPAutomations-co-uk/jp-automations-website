@@ -63,8 +63,15 @@ export async function POST(request: NextRequest) {
     const filename = sanitizeFilename(String(body.filename || ""))
     const mimeType = String(body.mimeType || "application/octet-stream").trim().toLowerCase()
 
-    if (mimeType.length > 128) {
-      return NextResponse.json({ error: "Invalid mimeType." }, { status: 400 })
+    const ALLOWED_MIME_TYPES = [
+      "image/jpeg", "image/png", "image/webp", "image/gif",
+      "video/mp4", "video/quicktime", "video/webm",
+      "audio/mpeg", "audio/wav", "audio/mp4",
+      "application/octet-stream", "application/json",
+    ]
+
+    if (mimeType.length > 128 || !ALLOWED_MIME_TYPES.includes(mimeType)) {
+      return NextResponse.json({ error: "Unsupported file type.", allowed: ALLOWED_MIME_TYPES }, { status: 400 })
     }
 
     const bucket = String(body.bucket || process.env.REEL_EDIT_INPUT_BUCKET || process.env.REEL_MEDIA_BUCKET || "reel-media").trim()

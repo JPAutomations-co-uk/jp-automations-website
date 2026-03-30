@@ -48,7 +48,7 @@ export default function OnboardingStep5() {
       title="Social & proof"
       subtitle="Almost done. Add your handles and any results you can share — used to make content feel specific and credible."
       step={5}
-      totalSteps={5}
+      totalSteps={6}
     >
       <div className="space-y-6 max-w-md mx-auto text-left">
         {/* Social handles */}
@@ -161,10 +161,10 @@ export default function OnboardingStep5() {
           </button>
           <button
             disabled={!isValid}
-            onClick={() => router.push("/onboarding/complete")}
+            onClick={() => router.push("/onboarding/step-6")}
             className="w-2/3 py-5 rounded-xl font-semibold bg-teal-400 text-black hover:bg-teal-300 hover:shadow-[0_0_30px_rgba(45,212,191,0.4)] transition-all"
           >
-            Finish setup →
+            Next →
           </button>
         </div>
       </div>

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     canonical: "https://www.jpautomations.co.uk/blog/crm-automation-personal-trainers-uk",
   },
   robots: {
-    index: false,
+    index: true,
     follow: false,
   },
   openGraph: {

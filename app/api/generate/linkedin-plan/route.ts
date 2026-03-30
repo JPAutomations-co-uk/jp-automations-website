@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { createClient } from "@/app/lib/supabase/server"
 import { createAdminClient } from "@/app/lib/supabase/admin"
+import { getProfileContext } from "@/app/lib/profile-context"
+import { buildMasterSystemPrompt, getUserFeedbackContext } from "@/app/lib/linkedin-master-prompt"
 
 const TOKEN_COST = 25
 
@@ -223,6 +225,47 @@ Every post's description must state exactly how this post creates real conversat
   return (tacticsMap[normalised] || tacticsMap["Lead Generation"]) + outcomeClause
 }
 
+function buildCtaRules(goal: string): string {
+  const normalised = normaliseGoal(goal)
+  const rules: Record<string, string> = {
+    "Brand Awareness": `BRAND AWARENESS = ZERO CTAs. This is non-negotiable.
+- NEVER include "DM me", "Book a call", "Link in bio", "Check out my service", or any sales language.
+- NEVER mention your offer, price, or booking links.
+- End every post with a genuine question OR a powerful standalone closing line — something that makes people think, share, or save.
+- The only acceptable closing: "Follow for more [topic]." Even that should be rare.
+- Every post must stand completely alone as pure value. It earns attention by being useful or thought-provoking, not by asking for anything.
+- caption_hook and description must have ZERO promotional framing. Write as a practitioner sharing insight, not as a business owner selling.`,
+
+    "Thought Leadership": `THOUGHT LEADERSHIP = AUTHORITY FIRST, SOFT ASKS ONLY.
+- NEVER use hard sales CTAs: no "DM me to book", no "link in bio to buy", no pricing mentions.
+- Acceptable endings: "Save this for later", "Follow for weekly insights on [topic]", genuine open questions.
+- TOFU/MOFU posts: close with a thought-provoking question or challenge. No ask at all.
+- BOFU posts: one soft CTA maximum — "If you want to work through this together, DM me."
+- Authority is built by giving without asking. Every post must demonstrate expertise, not promote services.`,
+
+    "Community Building": `COMMUNITY BUILDING = CONVERSATION, NOT CONVERSION.
+- No direct sales CTAs anywhere in the plan.
+- Every post must end with a question that invites genuine responses — specific, open-ended, personal.
+- BOFU posts can mention your offer in passing but must not ask for anything directly.
+- Focus on "what do you think?", "what's worked for you?", "I'd love to hear your take."
+- Community is built through dialogue. Write posts that start conversations, not ones that end with a pitch.`,
+
+    "Lead Generation": `LEAD GENERATION = EVERY POST WORKS TOWARD A CONVERSION.
+- TOFU posts: soft CTA — "DM me [word] and I'll send you [resource]" or a compelling question that surfaces their pain.
+- MOFU posts: medium CTA — "DM me [word] if you want to see exactly how we'd approach this for your business."
+- BOFU posts: hard CTA — "DM me [word] now" or "Book a free call — link in bio." Stack a brief proof point before the CTA.
+- Every description must explain exactly how this post generates enquiry intent.`,
+
+    "Sales & Conversions": `SALES & CONVERSIONS = DIRECTNESS IS KINDNESS.
+- Every post must move a warm prospect toward a purchase decision.
+- TOFU: desire before product — lead with the transformation, not the offer.
+- MOFU: frame the offer as the obvious solution. Handle price anchoring.
+- BOFU: direct, specific CTA with social proof stacked. "Book now", "DM [word] to apply", create FOMO.
+- descriptions must state exactly what buying objection or purchase friction this post removes.`,
+  }
+  return rules[normalised] || rules["Lead Generation"]
+}
+
 const getAnthropic = () => new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export async function POST(request: NextRequest) {
@@ -250,15 +293,21 @@ export async function POST(request: NextRequest) {
     const enabledFormats = cleanList(body.enabledFormats, 6, 60).filter((f) =>
       VALID_FORMATS.includes(f as (typeof VALID_FORMATS)[number])
     )
+    // New fields: duration, top performing content, additional topics, images
+    const duration = cleanText(body.duration, 20) || "full_month"
+    const topPerformingContent = cleanText(body.topPerformingContent, 3000)
+    const additionalTopics = cleanText(body.additionalTopics, 1000)
+    const wantsImages = body.wantsImages === true
+    const imagesPerWeek = wantsImages ? Math.max(0, Math.min(postsPerWeek, Number(body.imagesPerWeek) || 1)) : 0
 
-    if (![3, 5].includes(postsPerWeek)) {
-      return NextResponse.json({ error: "postsPerWeek must be 3 or 5" }, { status: 400 })
+    if (postsPerWeek < 1 || postsPerWeek > 7) {
+      return NextResponse.json({ error: "postsPerWeek must be between 1 and 7" }, { status: 400 })
     }
     if (!/^\d{4}-\d{2}$/.test(month)) {
       return NextResponse.json({ error: "month must be YYYY-MM" }, { status: 400 })
     }
-    if (!industry || !targetAudience || !goals) {
-      return NextResponse.json({ error: "industry, targetAudience, and goals are required" }, { status: 400 })
+    if (!goals) {
+      return NextResponse.json({ error: "goals is required" }, { status: 400 })
     }
 
     // Pre-check balance against token_balances table (same as X route)
@@ -276,28 +325,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    type ProfileRow = {
-      business_name?: string | null
-      industry?: string | null
-      target_audience?: string | null
-      brand_voice?: string | null
-      tone?: string | null
-      location?: string | null
-      voice_sample?: string | null
-    }
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("business_name, industry, target_audience, brand_voice, tone, location, voice_sample")
-      .eq("id", user.id)
-      .single()
-    const profile = profileData as ProfileRow | null
+    // Fetch full profile + LinkedIn-specific platform profile + feedback
+    const { profile, contextBlock } = await getProfileContext(user.id, "linkedin")
+    const feedbackConstraints = await getUserFeedbackContext(user.id)
 
-    // Build calendar slots
-    const daysInMonth = getDaysInMonth(month)
-    const [yearNum, monthNum] = month.split("-").map(Number)
-    const firstDayOfWeek = (new Date(yearNum, monthNum - 1, 1).getDay() + 6) % 7
-    const calendarWeeks = Math.ceil((daysInMonth + firstDayOfWeek) / 7)
-    const exactPosts = postsPerWeek * calendarWeeks
+    // Build calendar slots — support flexible duration
+    const durationWeeks: Record<string, number> = {
+      "1_week": 1, "2_weeks": 2, "3_weeks": 3, "4_weeks": 4, "full_month": 0,
+    }
+    const requestedWeeks = durationWeeks[duration] || 0
+
+    let exactPosts: number
+    if (requestedWeeks > 0) {
+      exactPosts = postsPerWeek * requestedWeeks
+    } else {
+      const daysInMonth = getDaysInMonth(month)
+      const [yearNum, monthNum] = month.split("-").map(Number)
+      const firstDayOfWeek = (new Date(yearNum, monthNum - 1, 1).getDay() + 6) % 7
+      const calendarWeeks = Math.ceil((daysInMonth + firstDayOfWeek) / 7)
+      exactPosts = postsPerWeek * calendarWeeks
+    }
 
     const funnelMix = normaliseMix(goals, audienceSize)
     const stageCounts = allocateStageCounts(exactPosts, funnelMix)
@@ -310,65 +357,90 @@ export async function POST(request: NextRequest) {
         : ["Tips & education", "Client results", "Thought leadership"]
     const safeFormats = enabledFormats.length > 0 ? enabledFormats : [...VALID_FORMATS]
 
-    const slots = stageSequence.map((stage, i) => ({
-      id: `slot-${i + 1}`,
-      date: dateSlots[i].date,
-      dayOfWeek: dateSlots[i].dayOfWeek,
-      funnel_stage: stage,
-      pillar: safePillars[i % safePillars.length],
-      format: pickFormat(stage, safeFormats, i),
-      primary_kpi: KPI_BY_STAGE[stage],
-    }))
+    // Determine which slots should be image/carousel posts
+    const imageSlotIndices = new Set<number>()
+    if (wantsImages && imagesPerWeek > 0) {
+      const weeksCount = Math.ceil(exactPosts / postsPerWeek)
+      const stagePriority = (s: FunnelStage) => s === "TOFU" ? 0 : s === "BOFU" ? 1 : 2
+      for (let w = 0; w < weeksCount; w++) {
+        const weekStart = w * postsPerWeek
+        const weekEnd = Math.min(weekStart + postsPerWeek, exactPosts)
+        const weekIndices = Array.from({ length: weekEnd - weekStart }, (_, i) => weekStart + i)
+        const sorted = [...weekIndices].sort((a, b) => stagePriority(stageSequence[a]) - stagePriority(stageSequence[b]))
+        sorted.slice(0, imagesPerWeek).forEach(i => imageSlotIndices.add(i))
+      }
+    }
+
+    const textOnlyFormats = safeFormats.filter(f => f !== "Image Post" && f !== "Carousel")
+    const safeTextFormats = textOnlyFormats.length > 0 ? textOnlyFormats : ["Text Post", "Long-form Post", "Poll"]
+
+    const slots = stageSequence.map((stage, i) => {
+      const isImageSlot = imageSlotIndices.has(i)
+      const format = isImageSlot
+        ? (stage === "MOFU" ? "Carousel" : "Image Post")
+        : pickFormat(stage, safeTextFormats, i)
+      return {
+        id: `slot-${i + 1}`,
+        date: dateSlots[i].date,
+        dayOfWeek: dateSlots[i].dayOfWeek,
+        funnel_stage: stage,
+        pillar: safePillars[i % safePillars.length],
+        format,
+        primary_kpi: KPI_BY_STAGE[stage],
+      }
+    })
 
     const goalTactics = buildGoalTactics(goals, desiredOutcomes)
 
-    const systemPrompt = `You are an elite LinkedIn strategist. Your mission: help this business achieve their goal through LinkedIn content.
+    const systemPrompt = buildMasterSystemPrompt(contextBlock, feedbackConstraints) + `
 
-Before writing each post, ask: "How does THIS specific post move a real person closer to ${normaliseGoal(goals)}?"
-
-Output valid JSON only. No markdown fences. No commentary.
+═══ PLANNER-SPECIFIC INSTRUCTIONS ═══
+You are planning a LinkedIn content calendar. Before writing each post brief, ask: "How does THIS specific post move a real person closer to ${normaliseGoal(goals)}?"
 
 For each post generate:
-- title: Specific and compelling. Not generic.
-- description: A focused content brief (60-80 words). What to say, what angle to take, and how it advances the goal.
-- caption_hook: The first 2-3 lines that appear before "see more" (~210 chars). Never start with "I" or the business name. Creates immediate curiosity, pain recognition, or a bold claim.
+- title: Specific and compelling. Not generic. Reference their business/niche.
+- description: A focused content brief (60-80 words). What to say, what angle to take, and how it advances the goal. Reference their specific offers/USP/proof when relevant.
+- caption_hook: The hook — first ~110 chars (mobile cutoff before "see more"). Never start with "I" or the business name. Creates immediate curiosity, pain recognition, or a bold claim. Match their voice style exactly.
+- variants: EXACTLY 3 different topic/angle options for this post slot. Each variant uses a DIFFERENT hook formula (e.g. data-driven, personal story/confessional, contrarian/bold claim). All 3 serve the same funnel_stage and pillar. Give the user a real choice — don't make them all similar. Each variant needs title + description (60-80 words) + caption_hook.
 - why_it_works: One sentence — the psychological mechanism for this funnel stage.
 - engagement_tip: One specific tactical action tied to the primary_kpi.
 - posting_time: HH:MM (24h). LinkedIn best times: 07:00-09:00 or 12:00-13:00, prioritise Tue-Thu.
-- hashtags: 3-5 values, no # prefix, relevant to the niche.`
+- hashtags: 3-5 values, no # prefix, relevant to the niche.
+
+IMPORTANT: The top-level title, description, caption_hook must match variants[0]. variants[1] and variants[2] are alternative angles.`
 
     const userPrompt = `Create a LinkedIn content plan for ${month}.
 
-BUSINESS CONTEXT:
-- Industry: ${industry}
-- Business: ${businessDescription || "Not provided"}
-- Audience: ${targetAudience}
+CONTEXT OVERRIDES (use these form inputs to override profile data where provided):
+- Industry: ${industry || cleanText(profile.industry, 100) || "Not provided"}
+- Business: ${businessDescription || cleanText(profile.business_description, 500) || "Not provided"}
+- Audience: ${targetAudience || cleanText(profile.target_audience, 500) || "Not provided"}
 - Audience Size: ${audienceSize}
 - Primary Goal: ${goals}
-- Desired Outcomes: ${desiredOutcomes || "Not provided"}
+- Desired Outcomes: ${desiredOutcomes || cleanText(profile.desired_outcomes, 500) || "Not provided"}
+- Duration: ${requestedWeeks > 0 ? `${requestedWeeks} week${requestedWeeks > 1 ? "s" : ""}` : "Full month"}
+${topPerformingContent ? `\nTOP PERFORMING CONTENT (use as reference to optimise hooks, angles, and formats):\n${topPerformingContent}` : ""}
+${additionalTopics ? `\nADDITIONAL TOPICS TO FOCUS ON:\n${additionalTopics}` : ""}
 
 GOAL STRATEGY — READ THIS CAREFULLY. EVERY POST MUST SERVE THIS:
 ${goalTactics}
 
-VOICE LOCK:
-- Brand Voice: ${cleanText(profile?.brand_voice, 200) || "Professional"}
-- Tone: ${cleanText(profile?.tone, 120) || "Authoritative but approachable"}
-- Business Name: ${cleanText(profile?.business_name, 120) || "Business"}
-- Location: ${cleanText(profile?.location, 120) || "UK"}
-- Voice Sample: ${cleanText(profile?.voice_sample, 2500) || "Not provided — write in a direct, expert tone"}
+CTA RULES — ENFORCE STRICTLY PER GOAL:
+${buildCtaRules(goals)}
 
 SLOT BLUEPRINTS (keep these fields exactly as provided):
 ${JSON.stringify(slots, null, 2)}
 
 RULES:
 1. Keep date, dayOfWeek, funnel_stage, pillar, format, primary_kpi exactly as slot values.
-2. caption_hook must be the first 2-3 lines before "see more" (~210 chars max). Never start with "I" or the business name.
+2. caption_hook must be ~110 chars max (mobile cutoff). Never start with "I" or the business name.
 3. description must be 60-80 words — focused content brief explaining what to say and the angle to take.
 4. Use 3-5 hashtags per post, no leading # symbol.
 5. All posts must use diverse angles — no repeated hooks or same opening words.
 6. posting_time must be HH:MM optimised for LinkedIn (07:00-09:00 or 12:00-13:00 preferred).
 7. why_it_works must explain the psychological mechanism for this funnel stage.
 8. engagement_tip must be a specific tactical action tied to the primary_kpi.
+9. variants must have EXACTLY 3 items. Each uses a different hook formula. variants[0] must match the top-level title/description/caption_hook. variants[1] and variants[2] must be genuinely different angles on the same topic/pillar.
 
 RESPONSE FORMAT (valid JSON only):
 {
@@ -393,7 +465,12 @@ RESPONSE FORMAT (valid JSON only):
       "hashtags": ["...", "..."],
       "why_it_works": "...",
       "engagement_tip": "...",
-      "primary_kpi": "impressions"
+      "primary_kpi": "impressions",
+      "variants": [
+        { "title": "...", "description": "60-80 word brief", "caption_hook": "~110 char hook" },
+        { "title": "...", "description": "60-80 word brief — different angle", "caption_hook": "~110 char hook — different formula" },
+        { "title": "...", "description": "60-80 word brief — third angle", "caption_hook": "~110 char hook — third formula" }
+      ]
     }
   ]
 }`
