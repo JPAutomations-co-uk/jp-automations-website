@@ -8,10 +8,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://www.jpautomations.co.uk/blog/ai-phone-answering-uk-tradespeople",
   },
-  robots: {
-    index: false,
-    follow: false,
-  },
   openGraph: {
     title: "AI Phone Answering for UK Tradespeople | JP Automations",
     description: "Never miss a lead again. AI phone answering for trades — handles calls, books jobs, and captures enquiries while you're on the tools.",
