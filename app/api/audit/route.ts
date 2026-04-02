@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   try {
     const { name, business, trade, revenue, timeEater, phone, email } = await request.json()
     const apiKey = process.env.RESEND_API_KEY
-    const fromEmail = process.env.CONTACT_FROM_EMAIL || 'contact@jpautomations.co.uk'
+    const fromEmail = 'jp@jpautomations.co.uk'
     const toEmail = process.env.CONTACT_TO_EMAIL || 'jp@jpautomations.co.uk'
 
     if (!apiKey) {
