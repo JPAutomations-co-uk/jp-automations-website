@@ -98,13 +98,13 @@ export async function POST(request: NextRequest) {
       from: `JP <${fromEmail}>`,
       to: email,
       subject: `got your audit request, ${firstName}`,
-      text: `Hey ${firstName}, thanks for filling that in — I've got everything I need to have a proper look at how ${business} runs.
+      text: `Hey ${firstName}, thanks for filling that in. I've got everything I need to have a proper look at how ${business} runs.
 
-I'll go through your online presence, how you're handling enquiries, and where the obvious time and money leaks are. You'll hear back from me within 24 hours with what I've found — no PDF deck, no generic advice, just the specific things I'd change if I were running ${business} myself.
+I'll go through your online presence, how you're handling enquiries, and where the obvious time and money leaks are. You'll hear back from me within 24 hours with what I've found. No PDF deck, no generic advice, just the specific things I'd change if I were running ${business} myself.
 
 Once I've sent that over, if you want to talk through it and figure out what to prioritise, you can grab a slot here: ${BOOKING_URL}
 
-No pressure on that at all — the audit's yours either way.
+No pressure on that at all, the audit's yours either way.
 
 Thanks,
 JP`,
@@ -119,7 +119,7 @@ JP`,
         to: email,
         subject: `had a look at ${business}`,
         scheduledAt: daysFromNow(2),
-        text: `Hey ${firstName}, just following up on the audit I sent through — wanted to make sure it landed and didn't end up buried in your inbox.
+        text: `Hey ${firstName}, just following up on the audit I sent through. Wanted to make sure it landed and didn't end up buried in your inbox.
 
 I found a couple of things that are worth talking through properly, because they're the kind of stuff that's hard to explain in an email without it turning into an essay. Much easier to walk you through it in 15 minutes and answer any questions on the spot.
 
@@ -136,9 +136,9 @@ JP`,
         to: email,
         subject: `last one from me, ${firstName}`,
         scheduledAt: daysFromNow(5),
-        text: `Hey ${firstName}, last email from me on this — I don't want to be that person who keeps following up when you've clearly got things to get on with.
+        text: `Hey ${firstName}, last email from me on this. I don't want to be that person who keeps following up when you've clearly got things to get on with.
 
-If the timing's off right now, completely get it. But if you did read through the audit and thought "yeah, I should probably sort that" — the call's still there whenever you're ready: ${BOOKING_URL}
+If the timing's off right now, completely get it. But if you did read through the audit and thought "yeah, I should probably sort that", the call's still there whenever you're ready: ${BOOKING_URL}
 
 Either way, if you ever want to pick my brain about anything at ${business}, just reply to this email. I read everything.
 
