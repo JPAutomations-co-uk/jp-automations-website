@@ -12,6 +12,7 @@ type ContactSource =
   | 'openclaw-guide'
   | 'contact-form'
   | 'apply-form'
+  | 'audit-form'
 
 interface CreateContactOptions {
   email: string

@@ -2,6 +2,7 @@ import { createAdminClient } from '@/app/lib/supabase/admin'
 
 export type SequenceId =
   | 'apply'
+  | 'audit'
   | 'blueprint'
   | 'openclaw'
   | 'prompt'
@@ -18,6 +19,7 @@ interface SequenceConfig {
 
 const SEQUENCE_CONFIG: Record<SequenceId, SequenceConfig> = {
   apply:           { priority: 100, durationDays: 7 },
+  audit:           { priority: 90,  durationDays: 7 },
   blueprint:       { priority: 10,  durationDays: 9 },
   openclaw:        { priority: 10,  durationDays: 9 },
   prompt:          { priority: 10,  durationDays: 9 },
