@@ -28,16 +28,34 @@ export default function AuditPage() {
     email: "",
   })
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [focusedField, setFocusedField] = useState<string | null>(null)
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    console.log("Audit form submission:", form)
-    setSubmitted(true)
+    setSubmitting(true)
+
+    try {
+      const res = await fetch("/api/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      })
+
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        alert("Something went wrong. Please try again.")
+      }
+    } catch {
+      alert("Something went wrong. Please try again.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -282,11 +300,13 @@ export default function AuditPage() {
                       {/* Submit */}
                       <motion.button
                         type="submit"
+                        disabled={submitting}
                         className="btn-primary w-full justify-center text-[13px] md:text-[15px] px-8 py-4 md:py-[18px]"
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={{ scale: submitting ? 1 : 1.01 }}
+                        whileTap={{ scale: submitting ? 1 : 0.98 }}
+                        style={{ opacity: submitting ? 0.6 : 1 }}
                       >
-                        GET MY FREE AUDIT <span className="arrow"><ArrowIcon /></span>
+                        {submitting ? "SUBMITTING..." : "GET MY FREE AUDIT"} {!submitting && <span className="arrow"><ArrowIcon /></span>}
                       </motion.button>
 
                       <p className="text-center text-[12px] mt-4" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,.25)" }}>
