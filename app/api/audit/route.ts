@@ -4,6 +4,8 @@ import { logToSheet } from '@/app/lib/log-to-sheet'
 import { addToLoops } from '@/app/lib/loops'
 import { tryEnrollSequence } from '@/app/lib/email-suppression'
 
+const BOOKING_URL = process.env.BOOKING_URL || 'https://calendar.app.google/hDU4A5Z4ZMKSiVAS7'
+
 function daysFromNow(days: number): string {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
 }
@@ -41,11 +43,11 @@ export async function POST(request: NextRequest) {
     // Add to Loops
     addToLoops({ email, firstName, source: 'audit-form' })
 
-    // Notify JP — structured email
+    // ── Notify JP — structured email ──────────────────────────────────────────
     await resend.emails.send({
       from: fromEmail,
       to: toEmail,
-      subject: `🔔 New Audit Request — ${business} (${trade})`,
+      subject: `New Audit Request — ${business} (${trade})`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
           <h2 style="color: #0d9488; margin-bottom: 4px;">New Free Audit Request</h2>
@@ -91,36 +93,58 @@ export async function POST(request: NextRequest) {
       `,
     })
 
-    // Auto-reply to applicant
+    // ── Email 1: Auto-reply (instant) ─────────────────────────────────────────
     resend.emails.send({
       from: `JP <${fromEmail}>`,
       to: email,
       subject: `got your audit request, ${firstName}`,
-      text: `Thanks for filling that in ${firstName}. I've got everything I need to have a proper look at ${business}.
+      text: `Hey ${firstName}, thanks for filling that in — I've got everything I need to have a proper look at how ${business} runs.
 
-I'll come back to you within 24 hours with 2-3 things I've spotted — no fluff, no pitch deck, just what I'd actually fix if it were my business.
+I'll go through your online presence, how you're handling enquiries, and where the obvious time and money leaks are. You'll hear back from me within 24 hours with what I've found — no PDF deck, no generic advice, just the specific things I'd change if I were running ${business} myself.
 
-Speak soon,
+Once I've sent that over, if you want to talk through it and figure out what to prioritise, you can grab a slot here: ${BOOKING_URL}
+
+No pressure on that at all — the audit's yours either way.
+
+Thanks,
 JP`,
     }).catch((err) => console.error('Audit auto-reply error:', err))
 
     const shouldNurture = await tryEnrollSequence(email, 'audit')
 
     if (shouldNurture) {
-      // Follow-up if no reply: Day 3
+      // ── Email 2: Follow-up 1 — Day 2 ─────────────────────────────────────────
       resend.emails.send({
         from: `JP <${fromEmail}>`,
         to: email,
-        subject: `your audit results for ${business}`,
-        scheduledAt: daysFromNow(3),
-        text: `${firstName} — just making sure my audit notes got through. I sent over a few things I spotted in how ${business} runs.
+        subject: `had a look at ${business}`,
+        scheduledAt: daysFromNow(2),
+        text: `Hey ${firstName}, just following up on the audit I sent through — wanted to make sure it landed and didn't end up buried in your inbox.
 
-If you want to talk through any of it, grab a slot here: jpautomations.co.uk/book-call
+I found a couple of things that are worth talking through properly, because they're the kind of stuff that's hard to explain in an email without it turning into an essay. Much easier to walk you through it in 15 minutes and answer any questions on the spot.
 
-No pressure either way.
+If you want to do that, grab a time here: ${BOOKING_URL}
+
+If you're still mulling it over, no rush at all. The notes aren't going anywhere.
 
 JP`,
-      }).catch((err) => console.error('Audit follow-up error:', err))
+      }).catch((err) => console.error('Audit follow-up 1 error:', err))
+
+      // ── Email 3: Follow-up 2 — Day 5 (final) ─────────────────────────────────
+      resend.emails.send({
+        from: `JP <${fromEmail}>`,
+        to: email,
+        subject: `last one from me, ${firstName}`,
+        scheduledAt: daysFromNow(5),
+        text: `Hey ${firstName}, last email from me on this — I don't want to be that person who keeps following up when you've clearly got things to get on with.
+
+If the timing's off right now, completely get it. But if you did read through the audit and thought "yeah, I should probably sort that" — the call's still there whenever you're ready: ${BOOKING_URL}
+
+Either way, if you ever want to pick my brain about anything at ${business}, just reply to this email. I read everything.
+
+Thanks,
+JP`,
+      }).catch((err) => console.error('Audit follow-up 2 error:', err))
     }
 
     return NextResponse.json({ success: true })
