@@ -205,6 +205,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-GB">
+      <head>
+        <link rel="preload" as="image" href="/hero-bg-poster.jpg" fetchPriority="high" />
+      </head>
       <body className={`${barlow.variable} ${barlowCondensed.variable} ${dmMono.variable} antialiased`}>
         {/* GA4 */}
         <Script

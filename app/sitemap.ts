@@ -96,12 +96,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/ai-automation-for-trades-liverpool`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
     { url: `${base}/ai-automation-for-trades-newcastle`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
 
-    // Location pages — AI agency (broader keyword targeting)
-    { url: `${base}/ai-agency-birmingham`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${base}/ai-agency-manchester`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${base}/ai-agency-london`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${base}/ai-agency-leeds`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${base}/ai-agency-uk`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
+    // ai-agency-* pages are redirected in next.config.ts — excluded from sitemap to avoid redirect chains
 
     // Conversion pages
     { url: `${base}/results`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.9 },

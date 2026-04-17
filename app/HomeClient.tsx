@@ -111,7 +111,7 @@ export default function HomeClient({ children, hideHero = false }: { children?: 
       <nav className={`fixed top-0 left-0 right-0 z-[1000] h-[70px] md:h-[90px] transition-all duration-300 ${scrolled ? "bg-black/70 backdrop-blur-[20px] border-b border-[var(--border)]" : ""}`}>
         <div className="max-w-[var(--content-max)] mx-auto px-5 md:px-[var(--gutter)] h-full flex items-center justify-between">
           <Link href="/" className="z-[1001]">
-            <Image src="/logo.png" alt="JP Automations" width={150} height={56} className="h-10 md:h-14 w-auto" />
+            <Image src="/logo.png" alt="JP Automations" width={150} height={56} className="h-10 md:h-14 w-auto" priority />
           </Link>
 
           {/* Desktop nav */}
@@ -233,6 +233,8 @@ export default function HomeClient({ children, hideHero = false }: { children?: 
           muted
           loop
           playsInline
+          preload="none"
+          poster="/hero-bg-poster.jpg"
           className="absolute inset-0 w-full h-full object-cover z-[1]"
           style={{ opacity: 0.75 }}
         >
@@ -259,24 +261,24 @@ export default function HomeClient({ children, hideHero = false }: { children?: 
 
             {/* Headline */}
             <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ y: 20 }}
+              animate={{ y: 0 }}
               transition={{ delay: 0.35, duration: 0.8 }}
               className="mb-4 md:mb-7"
               style={{ fontFamily: "var(--font-display)", fontWeight: 800, textTransform: "uppercase", letterSpacing: "-.02em", lineHeight: 0.92 }}
             >
               <span className="block text-[clamp(38px,11vw,100px)]">YOU HANDLE</span>
               <motion.span
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ y: 20 }}
+                animate={{ y: 0 }}
                 transition={{ delay: 0.45, duration: 0.7 }}
                 className="block text-[clamp(38px,11vw,100px)]"
               >
                 THE WORK.
               </motion.span>
               <motion.span
-                initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
+                initial={{ y: 20, scale: 0.98 }}
+                animate={{ y: 0, scale: 1 }}
                 transition={{ delay: 0.55, duration: 0.7 }}
                 className="block text-[clamp(38px,11vw,100px)]"
                 style={{ color: "var(--accent-primary)", textShadow: "0 0 60px rgba(45,212,191,.25)" }}
