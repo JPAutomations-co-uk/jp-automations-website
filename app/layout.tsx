@@ -26,11 +26,11 @@ const dmMono = DM_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "JP Automations | Websites, AI Systems & Lead Gen for UK Trades",
+    default: "AI Automation for UK Trades | JP Automations",
     template: "%s | JP Automations",
   },
   description:
-    "Websites, Google & Meta ads, SEO, and AI infrastructure for UK tradespeople. We build the digital systems that bring in leads, handle admin, and grow your business without growing your workload.",
+    "AI automation systems for UK tradespeople. Invoice automation, AI call handling, compliance, lead generation — built bespoke, live in 14 days, 90-day ROI guarantee.",
   alternates: {
     canonical: "https://www.jpautomations.co.uk",
     languages: {
@@ -38,32 +38,44 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "JP Automations | AI Automation Agency for UK Service Businesses",
+    title: "AI Automation for UK Trades | JP Automations",
     description:
-      "Custom AI automation systems for UK service businesses. One client recovered £10k in month one. 25+ hours reclaimed per week. Book a free audit.",
+      "Custom AI automation for UK tradespeople. One client recovered £10k in month one. 25+ hours reclaimed per week. 90-day ROI guarantee.",
     url: "https://www.jpautomations.co.uk",
     siteName: "JP Automations",
     locale: "en_GB",
     type: "website",
     images: [
       {
-        url: "https://www.jpautomations.co.uk/api/og?title=AI+Automation+for+UK+Service+Businesses&subtitle=JP+Automations",
+        url: "https://www.jpautomations.co.uk/api/og?title=AI+Automation+for+UK+Trades&subtitle=JP+Automations",
         width: 1200,
         height: 630,
-        alt: "JP Automations — AI Infrastructure for UK Service Businesses",
+        alt: "JP Automations — AI Automation for UK Trades",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "JP Automations | AI Automation Agency for UK Service Businesses",
+    title: "AI Automation for UK Trades | JP Automations",
     description:
-      "Custom AI automation systems for UK service businesses. One client recovered £10k in month one.",
-    images: ["https://www.jpautomations.co.uk/api/og?title=AI+Automation+for+UK+Service+Businesses&subtitle=JP+Automations"],
+      "Custom AI automation for UK tradespeople. One client recovered £10k in month one. 25+ hours reclaimed per week.",
+    images: ["https://www.jpautomations.co.uk/api/og?title=AI+Automation+for+UK+Trades&subtitle=JP+Automations"],
   },
   robots: {
     index: true,
     follow: true,
+  },
+}
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "JP Automations",
+  url: "https://www.jpautomations.co.uk",
+  description: "AI automation systems for UK tradespeople — roofers, plumbers, electricians, builders, and landscapers.",
+  publisher: {
+    "@type": "Organization",
+    name: "JP Automations",
   },
 }
 
@@ -78,7 +90,6 @@ const organizationSchema = {
   logo: "https://www.jpautomations.co.uk/logo.png",
   image: "https://www.jpautomations.co.uk/og-image.png",
   email: "jp@jpautomations.com",
-  telephone: "",
   founder: {
     "@type": "Person",
     name: "JP",
@@ -117,8 +128,8 @@ const organizationSchema = {
     ratingValue: "5.0",
     bestRating: "5",
     worstRating: "1",
-    ratingCount: "5",
-    reviewCount: "5",
+    ratingCount: "4",
+    reviewCount: "4",
   },
   sameAs: [
     "https://www.instagram.com/jpautomations/",
@@ -222,6 +233,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","vmw5xsb30i");`,
           }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
         <script
           type="application/ld+json"

@@ -5,7 +5,7 @@ const articleSchema = {
   "@type": "Article",
   headline: "Automated Follow-Up for Trades: The Step-by-Step Guide",
   description: "80% of sales happen after the 5th contact. Most tradespeople stop after 1. Here's how to automate follow-ups that actually get responses.",
-  author: { "@type": "Organization", name: "JP Automations", url: "https://www.jpautomations.co.uk" },
+  author: { "@type": "Person", name: "JP", url: "https://www.jpautomations.co.uk", sameAs: "https://www.linkedin.com/in/james-harvey-0583b2370/" },
   publisher: { "@type": "Organization", name: "JP Automations", logo: { "@type": "ImageObject", url: "https://www.jpautomations.co.uk/logo.png" } },
   datePublished: "2026-04-21",
   dateModified: "2026-04-21",

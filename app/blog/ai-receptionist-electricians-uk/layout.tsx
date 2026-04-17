@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     description: "An AI receptionist answers every call, qualifies the job, and books it into your diary. Here's how it works for UK electricians.",
     url: "https://www.jpautomations.co.uk/blog/ai-receptionist-electricians-uk",
     type: "article",
+    publishedTime: "2026-04-07",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [{ url: "https://www.jpautomations.co.uk/api/og?title=AI+Receptionist+for+Electricians+UK&subtitle=JP+Automations+Blog", width: 1200, height: 630, alt: "AI Receptionist for Electricians — JP Automations" }],
   },
   twitter: {

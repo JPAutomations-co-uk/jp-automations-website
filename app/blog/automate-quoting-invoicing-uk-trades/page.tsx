@@ -6,7 +6,7 @@ const articleSchema = {
   "@type": "Article",
   headline: "From Quote to Paid: How UK Tradesmen Are Automating the Entire Job Lifecycle",
   description: "The full job lifecycle automated — from enquiry to quote to invoice to payment. How UK tradespeople eliminate admin between jobs.",
-  author: { "@type": "Organization", name: "JP Automations", url: "https://www.jpautomations.co.uk" },
+  author: { "@type": "Person", name: "JP", url: "https://www.jpautomations.co.uk", sameAs: "https://www.linkedin.com/in/james-harvey-0583b2370/" },
   publisher: { "@type": "Organization", name: "JP Automations", logo: { "@type": "ImageObject", url: "https://www.jpautomations.co.uk/logo.png" } },
   datePublished: "2026-04-02",
   dateModified: "2026-04-02",

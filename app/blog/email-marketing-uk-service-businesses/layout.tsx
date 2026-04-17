@@ -14,6 +14,8 @@ export const metadata: Metadata = {
       "Email marketing for UK service businesses doing £250k+. How to automate campaigns that convert enquiries into paying clients without the manual work.",
     url: "https://www.jpautomations.co.uk/blog/email-marketing-uk-service-businesses",
     type: "article",
+    publishedTime: "2026-03-09",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [
       {
         url: "https://www.jpautomations.co.uk/api/og?title=Email+Marketing+for+UK+Service+Businesses&subtitle=JP+Automations+Blog",

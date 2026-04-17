@@ -5,7 +5,7 @@ const articleSchema = {
   "@type": "Article",
   headline: "The Real Cost of Missed Calls for Plumbers (And How to Fix It)",
   description: "UK plumbers miss 62% of inbound calls. At £180 per emergency callout, that's thousands walking to competitors every month. Here's the fix.",
-  author: { "@type": "Organization", name: "JP Automations", url: "https://www.jpautomations.co.uk" },
+  author: { "@type": "Person", name: "JP", url: "https://www.jpautomations.co.uk", sameAs: "https://www.linkedin.com/in/james-harvey-0583b2370/" },
   publisher: { "@type": "Organization", name: "JP Automations", logo: { "@type": "ImageObject", url: "https://www.jpautomations.co.uk/logo.png" } },
   datePublished: "2026-04-14",
   dateModified: "2026-04-14",

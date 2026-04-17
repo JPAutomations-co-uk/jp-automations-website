@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     description: "80% of sales happen after the 5th contact. Most tradespeople stop after 1. Here's how to automate follow-ups that actually get responses.",
     url: "https://www.jpautomations.co.uk/blog/automated-follow-up-trades-guide",
     type: "article",
+    publishedTime: "2026-04-21",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [{ url: "https://www.jpautomations.co.uk/api/og?title=Automated+Follow-Up+for+Trades&subtitle=JP+Automations+Blog", width: 1200, height: 630, alt: "Automated Follow-Up for Trades — JP Automations" }],
   },
   twitter: {

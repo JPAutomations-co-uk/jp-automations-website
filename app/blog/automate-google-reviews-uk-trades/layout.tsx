@@ -14,6 +14,8 @@ export const metadata: Metadata = {
       "The 3-step system UK tradespeople use to collect 5-star Google reviews automatically — without chasing clients or awkward conversations.",
     url: "https://www.jpautomations.co.uk/blog/automate-google-reviews-uk-trades",
     type: "article",
+    publishedTime: "2026-03-16",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [
       {
         url: "https://www.jpautomations.co.uk/api/og?title=How+to+Automate+Google+Reviews+for+Your+Trade+Business&subtitle=JP+Automations+Blog",

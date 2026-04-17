@@ -2,31 +2,35 @@ import type { Metadata } from "next"
 import BlogListClient from "./BlogListClient"
 
 export const metadata: Metadata = {
-  title: "Blog — AI Automation Guides & Case Studies",
+  title: "AI Automation Guides for UK Trades — Case Studies, Frameworks & Systems",
   description:
-    "Free guides and case studies for UK trade and service businesses. Learn how AI automation saves time, recovers revenue, and builds scalable systems that run without you.",
+    "30+ guides and case studies for UK roofers, plumbers, electricians, builders and landscapers. How AI automation recovers revenue, eliminates admin, and builds systems that run without you.",
   alternates: {
     canonical: "https://www.jpautomations.co.uk/blog",
   },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
-    title: "Blog — AI Automation for UK Service Businesses | JP Automations",
+    title: "AI Automation Guides for UK Trades | JP Automations",
     description:
-      "Case studies, frameworks, and practical guides for UK trade businesses ready to use AI automation to grow.",
+      "Case studies and practical frameworks for UK trade businesses. See how roofers, plumbers and electricians use AI to save 25+ hours per week.",
     url: "https://www.jpautomations.co.uk/blog",
     images: [
       {
         url: "https://www.jpautomations.co.uk/og-image.png",
         width: 1200,
         height: 630,
-        alt: "JP Automations Blog",
+        alt: "JP Automations Blog — AI Automation for UK Trades",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blog — AI Automation Guides & Case Studies",
+    title: "AI Automation Guides for UK Trades — Case Studies & Systems",
     description:
-      "Free guides and case studies for UK service businesses. AI automation tips that save time and recover revenue.",
+      "30+ guides for UK trade businesses. Invoice automation, call handling, compliance, lead generation — all running without you.",
     images: ["https://www.jpautomations.co.uk/og-image.png"],
   },
 }
@@ -95,6 +99,105 @@ const allPosts = [
     image: "/blog/ai-automation-roofing-companies-uk.jpg",
     date: "19 March 2026",
     publishDate: "2026-03-19",
+  },
+  {
+    title: "How UK Builders Are Automating CIS and Job Costing",
+    excerpt:
+      "UK builders and general contractors are using AI to track job margins in real time and eliminate CIS admin. Here's how it works and what it costs.",
+    slug: "/cis-job-costing-automation-builders-uk",
+    image: "/blog/cis-job-costing-automation-builders-uk.jpg",
+    date: "30 April 2026",
+    publishDate: "2026-04-30",
+  },
+  {
+    title: "Best AI Automation Tools for Tradesmen UK [2026]",
+    excerpt:
+      "A straight comparison of AI automation tools for UK tradespeople — what works, what's overhyped, and what's actually worth paying for.",
+    slug: "/best-ai-automation-tools-tradesmen-uk",
+    image: "/blog/best-ai-automation-tools-tradesmen-uk.jpg",
+    date: "28 April 2026",
+    publishDate: "2026-04-28",
+  },
+  {
+    title: "How to Get Paid in 6 Days Instead of 34 as a Roofer",
+    excerpt:
+      "The average roofer waits 34 days to get paid. One Birmingham crew got it down to 6 with automated invoicing. Here's exactly how.",
+    slug: "/get-paid-6-days-not-34-roofers",
+    image: "/blog/get-paid-6-days-not-34-roofers.jpg",
+    date: "24 April 2026",
+    publishDate: "2026-04-24",
+  },
+  {
+    title: "Automated Follow-Up for Trades: The Step-by-Step Guide",
+    excerpt:
+      "80% of sales happen after the 5th contact. Most tradespeople stop after 1. Here's how to automate follow-ups that actually get responses.",
+    slug: "/automated-follow-up-trades-guide",
+    image: "/blog/automated-follow-up-trades-guide.jpg",
+    date: "21 April 2026",
+    publishDate: "2026-04-21",
+  },
+  {
+    title: "Is AI Replacing Tradesmen? No — But It's Replacing Their Admin",
+    excerpt:
+      "AI isn't coming for your job. It's coming for the invoicing, the quoting, the follow-ups, and the paperwork you do at 9pm. Here's what that actually means.",
+    slug: "/is-ai-replacing-tradesmen",
+    image: "/blog/is-ai-replacing-tradesmen.jpg",
+    date: "17 April 2026",
+    publishDate: "2026-04-17",
+  },
+  {
+    title: "The Real Cost of Missed Calls for Plumbers (And How to Fix It)",
+    excerpt:
+      "UK plumbers miss 62% of inbound calls. At £180 per emergency callout, that's thousands walking to competitors every month. Here's the fix.",
+    slug: "/real-cost-missed-calls-plumbers",
+    image: "/blog/real-cost-missed-calls-plumbers.jpg",
+    date: "14 April 2026",
+    publishDate: "2026-04-14",
+  },
+  {
+    title: "How a Roofer Automated Quotes and Saved 12 Hours a Week",
+    excerpt:
+      "A Birmingham roofer was spending 12 hours a week on quoting and follow-ups. Here's how he automated the entire process and won more jobs.",
+    slug: "/automate-quotes-roofers-uk",
+    image: "/blog/automate-quotes-roofers-uk.jpg",
+    date: "10 April 2026",
+    publishDate: "2026-04-10",
+  },
+  {
+    title: "AI Receptionist for Electricians: How It Works, What It Costs",
+    excerpt:
+      "An AI receptionist answers every call, qualifies the job, and books it into your diary. Here's how it works for UK electricians and what it actually costs.",
+    slug: "/ai-receptionist-electricians-uk",
+    image: "/blog/ai-receptionist-electricians-uk.jpg",
+    date: "7 April 2026",
+    publishDate: "2026-04-07",
+  },
+  {
+    title: "WhatsApp Automation for UK Tradespeople: The Complete Guide",
+    excerpt:
+      "Most UK trades run their business through WhatsApp. Here's how to turn it from a chaotic group chat into an actual system.",
+    slug: "/whatsapp-automation-tradespeople-uk",
+    image: "/blog/whatsapp-automation-tradespeople-uk.jpg",
+    date: "3 April 2026",
+    publishDate: "2026-04-03",
+  },
+  {
+    title: "How to Automate Your Checkatrade Leads (So You Don't Lose Them)",
+    excerpt:
+      "Most Checkatrade leads go cold because nobody responds fast enough. Here's how to respond instantly, qualify automatically, and book the job.",
+    slug: "/automate-checkatrade-leads",
+    image: "/blog/automate-checkatrade-leads.jpg",
+    date: "31 March 2026",
+    publishDate: "2026-03-31",
+  },
+  {
+    title: "How to Stop Losing Jobs When You're on the Tools",
+    excerpt:
+      "UK tradespeople lose £24,000/year from missed calls. Here's how to make sure every enquiry gets handled — even when you can't pick up.",
+    slug: "/stop-losing-jobs-missed-calls-trades",
+    image: "/blog/stop-losing-jobs-missed-calls-trades.jpg",
+    date: "28 March 2026",
+    publishDate: "2026-03-28",
   },
   {
     title: "How to Automate Google Reviews for Your Trade Business",

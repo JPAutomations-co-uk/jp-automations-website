@@ -10,13 +10,15 @@ export const metadata: Metadata = {
   },
   robots: {
     index: true,
-    follow: false,
+    follow: true,
   },
   openGraph: {
     title: "The PT's Guide to a Fully Automated Fitness Business | JP Automations",
     description: "CRM, booking, and client automation for personal trainers. Run a fitness business that grows without admin holding you back.",
     url: "https://www.jpautomations.co.uk/blog/crm-automation-personal-trainers-uk",
     type: "article",
+    publishedTime: "2026-04-09",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [{ url: "https://www.jpautomations.co.uk/api/og?title=The+PT%27s+Guide+to+a+Fully+Automated+Fitness+Business&subtitle=JP+Automations+Blog", width: 1200, height: 630, alt: "PT Automation Guide — JP Automations" }],
   },
   twitter: {

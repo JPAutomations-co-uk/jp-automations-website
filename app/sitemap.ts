@@ -25,8 +25,9 @@ const blogPosts = [
   { slug: "automated-follow-up-trades-guide", date: "2026-04-21" },
   { slug: "get-paid-6-days-not-34-roofers", date: "2026-04-24" },
   { slug: "best-ai-automation-tools-tradesmen-uk", date: "2026-04-28" },
+  { slug: "cis-job-costing-automation-builders-uk", date: "2026-04-30" },
   { slug: "email-marketing-uk-service-businesses", date: "2026-03-09" },
-  { slug: "how-to-use-ai-effectively", date: "2026-03-07" },
+  // how-to-use-ai-effectively — noindexed (off-brand, dilutes topical authority)
   { slug: "business-process-automation-uk-service-businesses", date: "2026-03-05" },
   { slug: "automate-client-follow-up-uk-service-businesses", date: "2026-03-02" },
   { slug: "invoice-case-study", date: "2026-01-24" },
@@ -70,51 +71,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.9,
     },
-    {
-      url: `${base}/apply`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-
     // SEO pillar page
     {
       url: `${base}/ai-automation-for-service-businesses`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.9,
-    },
-
-    // Service pages
-    {
-      url: `${base}/ai-agency-uk`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.95,
-    },
-    {
-      url: `${base}/ai-agency-london`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${base}/ai-agency-manchester`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${base}/ai-agency-birmingham`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${base}/ai-agency-leeds`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
     },
 
     // Trade-specific landing pages
@@ -124,12 +86,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/ai-automation-for-builders-uk`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.95 },
     { url: `${base}/ai-automation-for-landscapers-uk`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.95 },
 
-    // Location pages
+    // Location pages — trades
     { url: `${base}/ai-automation-for-trades-birmingham`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
     { url: `${base}/ai-automation-for-trades-manchester`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
     { url: `${base}/ai-automation-for-trades-london`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
     { url: `${base}/ai-automation-for-trades-leeds`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
     { url: `${base}/ai-automation-for-trades-bristol`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
+    { url: `${base}/ai-automation-for-trades-sheffield`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
+    { url: `${base}/ai-automation-for-trades-liverpool`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
+    { url: `${base}/ai-automation-for-trades-newcastle`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
+
+    // Location pages — AI agency (broader keyword targeting)
+    { url: `${base}/ai-agency-birmingham`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${base}/ai-agency-manchester`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${base}/ai-agency-london`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${base}/ai-agency-leeds`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${base}/ai-agency-uk`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
 
     // Conversion pages
     { url: `${base}/results`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.9 },
@@ -145,68 +117,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // Published blog posts (auto-generated)
     ...publishedBlogs,
-
-    // Lead magnet landing pages
-    {
-      url: `${base}/free-blueprint`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${base}/free-prompt-guide`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${base}/free-prompt`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
-      url: `${base}/free-onboarding`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${base}/onboarding-guide`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
-      url: `${base}/free-client-folder`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${base}/client-folder-guide`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
-      url: `${base}/free-resources`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/free-openclaw`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${base}/openclaw-guide`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
 
     // Newsletter
     {

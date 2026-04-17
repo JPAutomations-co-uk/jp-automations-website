@@ -5,7 +5,7 @@ const articleSchema = {
   "@type": "Article",
   headline: "Is AI Replacing Tradesmen? No — But It's Replacing Their Admin",
   description: "AI isn't coming for your job. It's coming for the invoicing, the quoting, the follow-ups, and the paperwork you do at 9pm. Here's what that actually means.",
-  author: { "@type": "Organization", name: "JP Automations", url: "https://www.jpautomations.co.uk" },
+  author: { "@type": "Person", name: "JP", url: "https://www.jpautomations.co.uk", sameAs: "https://www.linkedin.com/in/james-harvey-0583b2370/" },
   publisher: { "@type": "Organization", name: "JP Automations", logo: { "@type": "ImageObject", url: "https://www.jpautomations.co.uk/logo.png" } },
   datePublished: "2026-04-17",
   dateModified: "2026-04-17",

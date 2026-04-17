@@ -10,13 +10,15 @@ export const metadata: Metadata = {
   },
   robots: {
     index: true,
-    follow: false,
+    follow: true,
   },
   openGraph: {
     title: "AI Automation for UK Cleaning Companies | JP Automations",
     description: "How cleaning businesses in the UK are using AI to automate scheduling, quoting, and client management.",
     url: "https://www.jpautomations.co.uk/blog/ai-automation-cleaning-companies-uk",
     type: "article",
+    publishedTime: "2026-04-06",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [{ url: "https://www.jpautomations.co.uk/api/og?title=AI+Automation+for+UK+Cleaning+Companies&subtitle=JP+Automations+Blog", width: 1200, height: 630, alt: "AI Automation for Cleaning Companies — JP Automations" }],
   },
   twitter: {

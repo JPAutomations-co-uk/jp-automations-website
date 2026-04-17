@@ -8,7 +8,7 @@ const articleSchema = {
   headline: "AI Receptionist for Electricians: How It Works, What It Costs",
   description:
     "An AI receptionist answers every call, qualifies the job, and books it into your diary. Here's how it works for UK electricians and what it actually costs.",
-  author: { "@type": "Organization", name: "JP Automations", url: "https://www.jpautomations.co.uk" },
+  author: { "@type": "Person", name: "JP", url: "https://www.jpautomations.co.uk", sameAs: "https://www.linkedin.com/in/james-harvey-0583b2370/" },
   publisher: { "@type": "Organization", name: "JP Automations", logo: { "@type": "ImageObject", url: "https://www.jpautomations.co.uk/logo.png" } },
   datePublished: "2026-04-07",
   dateModified: "2026-04-07",

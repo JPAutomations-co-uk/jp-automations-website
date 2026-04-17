@@ -14,6 +14,8 @@ export const metadata: Metadata = {
       "Most service businesses plateau because they're missing these three core systems. Here's what they are and how to build them.",
     url: "https://www.jpautomations.co.uk/blog/essential-business-systems",
     type: "article",
+    publishedTime: "2026-01-24",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [
       {
         url: "https://www.jpautomations.co.uk/api/og?title=The+3+Systems+Every+Scalable+Service+Business+Needs&subtitle=JP+Automations+Blog",

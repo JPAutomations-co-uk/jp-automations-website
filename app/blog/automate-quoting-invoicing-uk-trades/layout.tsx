@@ -10,13 +10,15 @@ export const metadata: Metadata = {
   },
   robots: {
     index: true,
-    follow: false,
+    follow: true,
   },
   openGraph: {
     title: "Automate Quoting & Invoicing for UK Trades | JP Automations",
     description: "The complete automation guide for UK tradespeople: enquiry → quote → job → invoice → payment → review. All connected. All automatic.",
     url: "https://www.jpautomations.co.uk/blog/automate-quoting-invoicing-uk-trades",
     type: "article",
+    publishedTime: "2026-04-02",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [{ url: "https://www.jpautomations.co.uk/api/og?title=From+Quote+to+Paid%3A+Automating+the+Job+Lifecycle&subtitle=JP+Automations+Blog", width: 1200, height: 630, alt: "Quote to Paid Automation — JP Automations" }],
   },
   twitter: {

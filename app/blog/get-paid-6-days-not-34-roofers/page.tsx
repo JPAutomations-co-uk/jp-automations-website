@@ -5,7 +5,7 @@ const articleSchema = {
   "@type": "Article",
   headline: "How to Get Paid in 6 Days Instead of 34 as a Roofer",
   description: "The average roofer waits 34 days to get paid. One Birmingham crew got it down to 6 with automated invoicing. Here's exactly how.",
-  author: { "@type": "Organization", name: "JP Automations", url: "https://www.jpautomations.co.uk" },
+  author: { "@type": "Person", name: "JP", url: "https://www.jpautomations.co.uk", sameAs: "https://www.linkedin.com/in/james-harvey-0583b2370/" },
   publisher: { "@type": "Organization", name: "JP Automations", logo: { "@type": "ImageObject", url: "https://www.jpautomations.co.uk/logo.png" } },
   datePublished: "2026-04-24",
   dateModified: "2026-04-24",

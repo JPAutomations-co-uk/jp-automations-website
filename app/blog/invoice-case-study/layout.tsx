@@ -14,6 +14,8 @@ export const metadata: Metadata = {
       "A roofing contractor was losing 25 hours/week to invoice admin and had £2,995 outstanding. One automation fixed both. Here's exactly how.",
     url: "https://www.jpautomations.co.uk/blog/invoice-case-study",
     type: "article",
+    publishedTime: "2026-01-24",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [
       {
         url: "https://www.jpautomations.co.uk/api/og?title=Case+Study%3A+25+Hours+Reclaimed+%26+%C2%A32%2C995+Recovered&subtitle=JP+Automations+Blog",

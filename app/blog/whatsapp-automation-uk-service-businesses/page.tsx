@@ -7,7 +7,7 @@ const articleSchema = {
   headline: "WhatsApp Automation for UK Service Businesses",
   description:
     "How UK service businesses use WhatsApp Business API automation for quotes, bookings, follow-ups, and payment reminders — without being glued to their phone.",
-  author: { "@type": "Organization", name: "JP Automations", url: "https://www.jpautomations.co.uk" },
+  author: { "@type": "Person", name: "JP", url: "https://www.jpautomations.co.uk", sameAs: "https://www.linkedin.com/in/james-harvey-0583b2370/" },
   publisher: { "@type": "Organization", name: "JP Automations", logo: { "@type": "ImageObject", url: "https://www.jpautomations.co.uk/logo.png" } },
   datePublished: "2026-03-23",
   dateModified: "2026-03-23",

@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     description: "UK tradespeople lose £24,000/year from missed calls. Here's how to make sure every enquiry gets handled — even when you can't pick up.",
     url: "https://www.jpautomations.co.uk/blog/stop-losing-jobs-missed-calls-trades",
     type: "article",
+    publishedTime: "2026-03-28",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [{ url: "https://www.jpautomations.co.uk/api/og?title=Stop+Losing+Jobs+From+Missed+Calls&subtitle=JP+Automations+Blog", width: 1200, height: 630, alt: "Stop Losing Jobs From Missed Calls — JP Automations" }],
   },
   twitter: {

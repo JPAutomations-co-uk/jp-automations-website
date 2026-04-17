@@ -34,6 +34,20 @@ const nextConfig: NextConfig = {
       { source: "/for-electricians", destination: "/ai-automation-for-electricians-uk", permanent: true },
       { source: "/for-builders", destination: "/ai-automation-for-builders-uk", permanent: true },
       { source: "/for-landscapers", destination: "/ai-automation-for-landscapers-uk", permanent: true },
+      // Old lead magnet pages → newsletter or blog
+      { source: "/free-blueprint", destination: "/newsletter", permanent: true },
+      { source: "/free-prompt", destination: "/newsletter", permanent: true },
+      { source: "/free-prompt-guide", destination: "/newsletter", permanent: true },
+      { source: "/free-onboarding", destination: "/newsletter", permanent: true },
+      { source: "/free-client-folder", destination: "/newsletter", permanent: true },
+      { source: "/free-resources", destination: "/newsletter", permanent: true },
+      { source: "/free-openclaw", destination: "/newsletter", permanent: true },
+      { source: "/blueprint", destination: "/newsletter", permanent: true },
+      { source: "/prompt", destination: "/newsletter", permanent: true },
+      { source: "/prompt-guide", destination: "/newsletter", permanent: true },
+      { source: "/onboarding-guide", destination: "/newsletter", permanent: true },
+      { source: "/client-folder-guide", destination: "/newsletter", permanent: true },
+      { source: "/openclaw-guide", destination: "/newsletter", permanent: true },
     ]
   },
 };

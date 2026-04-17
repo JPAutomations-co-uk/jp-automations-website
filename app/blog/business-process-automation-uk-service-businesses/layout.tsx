@@ -14,6 +14,8 @@ export const metadata: Metadata = {
       "Invoice chasing, appointment reminders, lead follow-up, review requests, client onboarding. These five automations remove the biggest time drains in a service business.",
     url: "https://www.jpautomations.co.uk/blog/business-process-automation-uk-service-businesses",
     type: "article",
+    publishedTime: "2026-03-05",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [
       {
         url: "https://www.jpautomations.co.uk/api/og?title=5+Business+Processes+Every+UK+Service+Business+Should+Automate&subtitle=JP+Automations+Blog",

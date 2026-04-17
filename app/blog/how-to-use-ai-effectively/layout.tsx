@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   title: "How to Use AI Effectively — Prompting Guide for Better LLM Outputs",
   description:
     "Most people get average results from AI because they prompt it wrong. Learn how to use ChatGPT, Claude, and other LLMs effectively with the four-layer prompt framework, iteration techniques, and model selection strategies.",
+  robots: {
+    index: false,
+    follow: true,
+  },
   alternates: {
     canonical: "https://www.jpautomations.co.uk/blog/how-to-use-ai-effectively",
   },

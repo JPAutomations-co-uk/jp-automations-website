@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     description: "AI isn't coming for your job. It's coming for the invoicing, the quoting, the follow-ups, and the paperwork you do at 9pm.",
     url: "https://www.jpautomations.co.uk/blog/is-ai-replacing-tradesmen",
     type: "article",
+    publishedTime: "2026-04-17",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [{ url: "https://www.jpautomations.co.uk/api/og?title=Is+AI+Replacing+Tradesmen%3F&subtitle=JP+Automations+Blog", width: 1200, height: 630, alt: "Is AI Replacing Tradesmen — JP Automations" }],
   },
   twitter: {

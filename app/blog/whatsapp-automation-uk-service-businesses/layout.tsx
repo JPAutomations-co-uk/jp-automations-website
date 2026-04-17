@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   },
   robots: {
     index: true,
-    follow: false,
+    follow: true,
   },
   openGraph: {
     title: "WhatsApp Automation for UK Service Businesses | JP Automations",
@@ -18,6 +18,8 @@ export const metadata: Metadata = {
       "Automate quotes, bookings, and client follow-up through WhatsApp — the channel your clients already use every day.",
     url: "https://www.jpautomations.co.uk/blog/whatsapp-automation-uk-service-businesses",
     type: "article",
+    publishedTime: "2026-03-23",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [
       {
         url: "https://www.jpautomations.co.uk/api/og?title=WhatsApp+Automation+for+UK+Service+Businesses&subtitle=JP+Automations+Blog",

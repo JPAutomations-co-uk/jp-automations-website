@@ -393,7 +393,7 @@ export default function HomeClient({ children, hideHero = false }: { children?: 
             </div>
 
             {/* Link columns */}
-            <div className="grid grid-cols-2 gap-8 md:gap-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-10">
               {[
                 { title: "Trades", links: [
                   { label: "For Roofers", href: "/ai-automation-for-roofers-uk" },
@@ -402,10 +402,20 @@ export default function HomeClient({ children, hideHero = false }: { children?: 
                   { label: "For Builders", href: "/ai-automation-for-builders-uk" },
                   { label: "For Landscapers", href: "/ai-automation-for-landscapers-uk" },
                 ]},
+                { title: "Locations", links: [
+                  { label: "Birmingham", href: "/ai-automation-for-trades-birmingham" },
+                  { label: "Manchester", href: "/ai-automation-for-trades-manchester" },
+                  { label: "London", href: "/ai-automation-for-trades-london" },
+                  { label: "Leeds", href: "/ai-automation-for-trades-leeds" },
+                  { label: "Bristol", href: "/ai-automation-for-trades-bristol" },
+                  { label: "Sheffield", href: "/ai-automation-for-trades-sheffield" },
+                  { label: "Liverpool", href: "/ai-automation-for-trades-liverpool" },
+                  { label: "Newcastle", href: "/ai-automation-for-trades-newcastle" },
+                ]},
                 { title: "Company", links: [
                   { label: "Results", href: "/results" },
                   { label: "Blog", href: "/blog" },
-                  { label: "Free Resources", href: "/free-resources" },
+                  { label: "Newsletter", href: "/newsletter" },
                   { label: "Free Audit", href: "/audit" },
                 ]},
               ].map((col) => (

@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     description: "Most Checkatrade leads go cold because nobody responds fast enough. Here's how to respond instantly, qualify automatically, and book the job.",
     url: "https://www.jpautomations.co.uk/blog/automate-checkatrade-leads",
     type: "article",
+    publishedTime: "2026-03-31",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [{ url: "https://www.jpautomations.co.uk/api/og?title=Automate+Your+Checkatrade+Leads&subtitle=JP+Automations+Blog", width: 1200, height: 630, alt: "Automate Checkatrade Leads — JP Automations" }],
   },
   twitter: {

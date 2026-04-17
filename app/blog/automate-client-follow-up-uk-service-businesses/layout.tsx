@@ -14,6 +14,8 @@ export const metadata: Metadata = {
       "A lead comes in on Tuesday. You're on a job. By Friday, they've hired someone else. Here's how to fix that — without expensive CRM software.",
     url: "https://www.jpautomations.co.uk/blog/automate-client-follow-up-uk-service-businesses",
     type: "article",
+    publishedTime: "2026-03-02",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [
       {
         url: "https://www.jpautomations.co.uk/api/og?title=How+to+Automate+Client+Follow-Up+for+UK+Service+Businesses&subtitle=JP+Automations+Blog",

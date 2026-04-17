@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   },
   robots: {
     index: true,
-    follow: false,
+    follow: true,
   },
   openGraph: {
     title: "Automated Lead Generation for UK Service Businesses | JP Automations",
@@ -18,6 +18,8 @@ export const metadata: Metadata = {
       "The system UK service businesses use to generate, qualify, and convert leads automatically — without paid ads.",
     url: "https://www.jpautomations.co.uk/blog/lead-generation-automation-uk-service-businesses",
     type: "article",
+    publishedTime: "2026-03-26",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [
       {
         url: "https://www.jpautomations.co.uk/api/og?title=Automated+Lead+Generation+for+UK+Service+Businesses&subtitle=JP+Automations+Blog",

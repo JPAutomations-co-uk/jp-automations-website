@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   },
   robots: {
     index: true,
-    follow: false,
+    follow: true,
   },
   openGraph: {
     title: "AI Automation for Roofing Companies in the UK | JP Automations",
@@ -18,6 +18,8 @@ export const metadata: Metadata = {
       "The complete guide to AI automation for UK roofing contractors. Quoting, scheduling, invoicing, and review collection — all running without you.",
     url: "https://www.jpautomations.co.uk/blog/ai-automation-roofing-companies-uk",
     type: "article",
+    publishedTime: "2026-03-19",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [
       {
         url: "https://www.jpautomations.co.uk/api/og?title=AI+Automation+for+Roofing+Companies+in+the+UK&subtitle=JP+Automations+Blog",

@@ -684,19 +684,31 @@ export default function Home() {
               Inverness &mdash; if you&apos;ve got a phone and a laptop, we can build your system.
             </p>
             <div className="flex flex-wrap justify-center gap-2 md:gap-3">
-              {["Birmingham", "Manchester", "Leeds", "Bristol", "Sheffield", "Liverpool", "London", "Newcastle"].map((loc, i) => (
-                <motion.span
-                  key={loc}
+              {[
+                { label: "Birmingham", href: "/ai-automation-for-trades-birmingham" },
+                { label: "Manchester", href: "/ai-automation-for-trades-manchester" },
+                { label: "Leeds", href: "/ai-automation-for-trades-leeds" },
+                { label: "Bristol", href: "/ai-automation-for-trades-bristol" },
+                { label: "Sheffield", href: "/ai-automation-for-trades-sheffield" },
+                { label: "Liverpool", href: "/ai-automation-for-trades-liverpool" },
+                { label: "London", href: "/ai-automation-for-trades-london" },
+                { label: "Newcastle", href: "/ai-automation-for-trades-newcastle" },
+              ].map((loc, i) => (
+                <motion.div
+                  key={loc.label}
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: i * 0.05 }}
-                  whileHover={{ borderColor: "rgba(45,212,191,.4)", color: "#fff" }}
-                  className="text-[11px] md:text-[13px] border border-[var(--border)] px-4 md:px-5 py-2 md:py-2.5 transition-colors cursor-default"
-                  style={{ fontFamily: "var(--font-body)", color: "var(--text-secondary)", borderRadius: 2 }}
                 >
-                  {loc}
-                </motion.span>
+                  <Link
+                    href={loc.href}
+                    className="block text-[11px] md:text-[13px] border border-[var(--border)] px-4 md:px-5 py-2 md:py-2.5 transition-colors hover:border-[rgba(45,212,191,.4)] hover:text-white"
+                    style={{ fontFamily: "var(--font-body)", color: "var(--text-secondary)", borderRadius: 2, textDecoration: "none" }}
+                  >
+                    {loc.label}
+                  </Link>
+                </motion.div>
               ))}
             </div>
           </FadeUp>

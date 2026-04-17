@@ -8,7 +8,7 @@ const articleSchema = {
   headline: "How a Roofer Automated Quotes and Saved 12 Hours a Week",
   description:
     "A Birmingham roofer was spending 12 hours a week on quoting and follow-ups. Here's how he automated the entire process and won more jobs.",
-  author: { "@type": "Organization", name: "JP Automations", url: "https://www.jpautomations.co.uk" },
+  author: { "@type": "Person", name: "JP", url: "https://www.jpautomations.co.uk", sameAs: "https://www.linkedin.com/in/james-harvey-0583b2370/" },
   publisher: { "@type": "Organization", name: "JP Automations", logo: { "@type": "ImageObject", url: "https://www.jpautomations.co.uk/logo.png" } },
   datePublished: "2026-04-10",
   dateModified: "2026-04-10",

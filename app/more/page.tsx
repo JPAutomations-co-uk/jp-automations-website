@@ -38,7 +38,7 @@ export default function MorePage() {
 
           <div className="hidden md:flex items-center gap-5">
             <a href="/blog" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Blog</a>
-            <a href="/free-resources" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Free Resources</a>
+            <a href="/newsletter" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Newsletter</a>
             <AppsDropdown />
             <a href="/apply" className="px-5 py-2.5 text-sm font-semibold bg-teal-400 text-black rounded-lg hover:bg-teal-300 transition-all">
               Book a Call
@@ -63,7 +63,7 @@ export default function MorePage() {
         <div className="flex flex-col items-center gap-8 text-center">
           <Link href="/" className="text-4xl font-bold text-gray-300 hover:text-teal-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
           <a href="/blog" className="text-4xl font-bold text-gray-300 hover:text-teal-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Blog</a>
-          <a href="/free-resources" className="text-4xl font-bold text-gray-300 hover:text-teal-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Free Resources</a>
+          <a href="/newsletter" className="text-4xl font-bold text-gray-300 hover:text-teal-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Newsletter</a>
           <AppsMobileLinks onClose={() => setIsMobileMenuOpen(false)} />
           <a href="/apply" className="text-4xl font-bold text-gray-300 hover:text-teal-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Book a Call</a>
         </div>

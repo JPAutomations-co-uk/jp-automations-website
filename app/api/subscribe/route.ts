@@ -62,7 +62,7 @@ Do the 10-minute trace. You'll find yours.
 
 JP
 
-P.S. I wrote the full framework for finding and fixing these into a guide — The Automation Blueprint. Worth 30 minutes if you want the structured version. jpautomations.co.uk/free-blueprint`,
+P.S. I wrote the full breakdown of how to find these bottlenecks in your business here: jpautomations.co.uk/blog/biggest-automation-mistakes-service-businesses`,
     })
 
     const shouldNurture = await tryEnrollSequence(email, 'newsletter')
@@ -91,7 +91,7 @@ The difference between a business that scales and one that doesn't is almost alw
 
 JP
 
-P.S. I packaged the exact intake form questions, email prompts, and Notion template into a system — takes about 2 hours to set up once, then every client after that is under 10 minutes. jpautomations.co.uk/free-onboarding`,
+P.S. I broke down exactly how to build this kind of onboarding system here: jpautomations.co.uk/blog/business-process-automation-uk-service-businesses`,
     })
 
     // ── Welcome Email 3: Day 6 ──────────────────────────────────────────────
@@ -122,7 +122,7 @@ That's your entire client admin compressed into one input. Everything else is ge
 
 JP
 
-P.S. I built this into a ready-to-use system with the brief template, AI prompts for each document, and the folder structure to keep it organised. jpautomations.co.uk/free-client-folder`,
+P.S. I wrote a full breakdown of automating your quotes and proposals here: jpautomations.co.uk/blog/automate-quoting-invoicing-uk-trades`,
     })
     }
 

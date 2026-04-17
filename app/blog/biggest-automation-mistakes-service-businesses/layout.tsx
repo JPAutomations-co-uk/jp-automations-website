@@ -14,6 +14,8 @@ export const metadata: Metadata = {
       "Most automation projects fail for the same reasons. Here's what goes wrong — and what to do instead.",
     url: "https://www.jpautomations.co.uk/blog/biggest-automation-mistakes-service-businesses",
     type: "article",
+    publishedTime: "2026-01-24",
+    authors: ["https://www.jpautomations.co.uk"],
     images: [
       {
         url: "https://www.jpautomations.co.uk/api/og?title=The+Biggest+Automation+Mistakes+Service+Businesses+Make&subtitle=JP+Automations+Blog",

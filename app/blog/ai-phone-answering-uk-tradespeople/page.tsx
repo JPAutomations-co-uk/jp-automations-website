@@ -6,7 +6,7 @@ const articleSchema = {
   "@type": "Article",
   headline: "AI Phone Answering for UK Tradespeople: Never Miss Another Lead",
   description: "UK tradespeople miss 40-60% of inbound calls because they're on a job. AI phone answering handles calls, books appointments, and captures leads — 24/7.",
-  author: { "@type": "Organization", name: "JP Automations", url: "https://www.jpautomations.co.uk" },
+  author: { "@type": "Person", name: "JP", url: "https://www.jpautomations.co.uk", sameAs: "https://www.linkedin.com/in/james-harvey-0583b2370/" },
   publisher: { "@type": "Organization", name: "JP Automations", logo: { "@type": "ImageObject", url: "https://www.jpautomations.co.uk/logo.png" } },
   datePublished: "2026-03-30",
   dateModified: "2026-03-30",

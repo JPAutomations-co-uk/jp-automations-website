@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "The complete VS Code and Cursor setup guide — secrets protection, commit signing, auto-formatting, linting, TypeScript strict mode, pre-commit hooks, and AI configuration. Everything you need, nothing you don't.",
   robots: {
     index: false,
-    follow: false,
+    follow: true,
   },
   alternates: {
     canonical: "https://www.jpautomations.co.uk/blog/setup-your-ide-properly",
