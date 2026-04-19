@@ -100,6 +100,11 @@ export default function TradePageClient() {
         { label: "Electricians", href: "/ai-automation-for-electricians-uk" },
         { label: "Landscapers", href: "/ai-automation-for-landscapers-uk" },
       ]}
+      relatedPosts={[
+        { title: "How UK Builders Are Automating CIS and Job Costing", href: "/blog/cis-job-costing-automation-builders-uk", description: "How builders are tracking live job margins, automating CIS returns, and never missing another HMRC deadline." },
+        { title: "The Complete Guide to Automated Follow-Up", href: "/blog/automated-follow-up-trades-guide", description: "Every touchpoint from quote to payment, running automatically. The follow-up system UK contractors use to close more jobs." },
+        { title: "How to Automate Quoting and Invoicing", href: "/blog/automate-quoting-invoicing-uk-trades", description: "The full quote-to-cash pipeline UK trades use to send quotes faster, follow up automatically, and get paid sooner." },
+      ]}
     />
   )
 }

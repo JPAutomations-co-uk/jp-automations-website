@@ -100,6 +100,11 @@ export default function TradePageClient() {
         { label: "Builders", href: "/ai-automation-for-builders-uk" },
         { label: "Landscapers", href: "/ai-automation-for-landscapers-uk" },
       ]}
+      relatedPosts={[
+        { title: "The Real Cost of Missed Calls for Plumbers", href: "/blog/real-cost-missed-calls-plumbers", description: "UK plumbers miss 62% of inbound calls during working hours. At £180 per callout, here's what that actually costs you." },
+        { title: "Stop Losing Jobs to Missed Calls", href: "/blog/stop-losing-jobs-missed-calls-trades", description: "The exact system UK tradespeople use to answer every call, qualify every lead, and never lose a job while on site." },
+        { title: "AI Phone Answering for UK Tradespeople", href: "/blog/ai-phone-answering-uk-tradespeople", description: "How an AI call handler books jobs while you're on the tools — and why one heating engineer added £16,800 in a single winter." },
+      ]}
     />
   )
 }

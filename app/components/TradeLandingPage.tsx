@@ -31,6 +31,7 @@ interface TradePageProps {
   caseStudy: CaseStudy
   faqs: FAQ[]
   relatedTrades: { label: string; href: string }[]
+  relatedPosts?: { title: string; href: string; description: string }[]
 }
 
 function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
@@ -56,7 +57,7 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
 }
 
 export default function TradeLandingPage({
-  trade, headline, subhead, heroImage, painPoints, systems, caseStudy, faqs, relatedTrades,
+  trade, headline, subhead, heroImage, painPoints, systems, caseStudy, faqs, relatedTrades, relatedPosts,
 }: TradePageProps) {
   // FAQ Schema for rich results
   const faqSchema = {
@@ -332,6 +333,46 @@ export default function TradeLandingPage({
           </div>
         </div>
       </section>
+
+      {/* ===== FROM THE BLOG ===== */}
+      {relatedPosts && relatedPosts.length > 0 && (
+        <section className="py-[var(--section-pad-y)] bg-[var(--bg-secondary)]" style={{ marginTop: "-4vw", paddingTop: "calc(var(--section-pad-y) + 4vw)", paddingBottom: "calc(var(--section-pad-y) + 4vw)", clipPath: "polygon(0 0, 100% 0, 100% calc(100% - 4vw), 0 100%)" }}>
+          <div className="max-w-[var(--content-max)] mx-auto px-5 md:px-[var(--gutter)]">
+            <FadeUp className="mb-10 md:mb-12">
+              <div className="section-label"><span>From the Blog</span></div>
+              <h2 className="h1">READ MORE.</h2>
+            </FadeUp>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
+              {relatedPosts.map((post, i) => (
+                <motion.div
+                  key={post.href}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.5, delay: i * 0.08 }}
+                >
+                  <Link
+                    href={post.href}
+                    className="block bg-[var(--bg-card)] border border-[var(--border)] p-6 md:p-8 hover:border-[var(--border-accent)] transition-all duration-300 h-full"
+                    style={{ borderRadius: 2, textDecoration: "none" }}
+                  >
+                    <p className="text-[11px] tracking-[.2em] mb-3" style={{ fontFamily: "var(--font-body)", color: "var(--accent-primary)" }}>[ BLOG ]</p>
+                    <h3 className="text-[clamp(15px,1.5vw,18px)] leading-[1.3] mb-3" style={{ fontFamily: "var(--font-display)", fontWeight: 800, color: "var(--text-primary)", textTransform: "uppercase" }}>
+                      {post.title}
+                    </h3>
+                    <p className="text-[13px] leading-[1.7]" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,.45)" }}>
+                      {post.description}
+                    </p>
+                    <p className="text-[12px] mt-4 flex items-center gap-2" style={{ fontFamily: "var(--font-body)", color: "var(--accent-primary)" }}>
+                      Read article <ArrowIcon size={11} />
+                    </p>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ===== OTHER TRADES ===== */}
       <section className="py-[var(--section-pad-y)] bg-[var(--bg-primary)]" style={{ marginTop: "-4vw", paddingTop: "calc(var(--section-pad-y) + 4vw)" }}>

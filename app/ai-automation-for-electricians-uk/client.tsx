@@ -100,6 +100,11 @@ export default function TradePageClient() {
         { label: "Builders", href: "/ai-automation-for-builders-uk" },
         { label: "Landscapers", href: "/ai-automation-for-landscapers-uk" },
       ]}
+      relatedPosts={[
+        { title: "AI Receptionist for Electricians UK", href: "/blog/ai-receptionist-electricians-uk", description: "How NICEIC electricians are using AI call handling to book more jobs without missing a call while on site." },
+        { title: "How to Automate Quoting and Invoicing", href: "/blog/automate-quoting-invoicing-uk-trades", description: "The full quote-to-cash pipeline UK trades use to send quotes faster, follow up automatically, and get paid sooner." },
+        { title: "Compliance Admin Automation for Electricians", href: "/blog/ai-automation-roofing-companies-uk", description: "How trades are cutting 8+ hours of weekly admin down to under 30 minutes with automated certificates and notifications." },
+      ]}
     />
   )
 }

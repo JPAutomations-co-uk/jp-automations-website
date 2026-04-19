@@ -100,6 +100,11 @@ export default function TradePageClient() {
         { label: "Builders", href: "/ai-automation-for-builders-uk" },
         { label: "Landscapers", href: "/ai-automation-for-landscapers-uk" },
       ]}
+      relatedPosts={[
+        { title: "How Roofers Are Automating Quotes and Winning More Jobs", href: "/blog/automate-quotes-roofers-uk", description: "How roofers are sending quotes the same day, following up automatically, and hitting 52% close rates." },
+        { title: "Get Paid in 6 Days Instead of 34", href: "/blog/get-paid-6-days-not-34-roofers", description: "One Birmingham crew cut payment time from 34 days to 6 using automated invoicing. Here's exactly how." },
+        { title: "How to Automate Checkatrade Leads", href: "/blog/automate-checkatrade-leads", description: "Stop letting Checkatrade leads go cold. The follow-up system that turns enquiries into booked jobs automatically." },
+      ]}
     />
   )
 }

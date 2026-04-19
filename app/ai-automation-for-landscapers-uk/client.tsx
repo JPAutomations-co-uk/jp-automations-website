@@ -99,6 +99,11 @@ export default function LandscapersClient() {
         { label: "Electricians", href: "/ai-automation-for-electricians-uk" },
         { label: "Builders", href: "/ai-automation-for-builders-uk" },
       ]}
+      relatedPosts={[
+        { title: "CRM Automation for Personal Trainers & Service Businesses", href: "/blog/crm-automation-personal-trainers-uk", description: "How service businesses are automating client management, follow-ups, and recurring bookings without lifting a finger." },
+        { title: "The Complete Guide to Automated Follow-Up", href: "/blog/automated-follow-up-trades-guide", description: "Every touchpoint from quote to payment, running automatically. The system UK trades use to close more jobs." },
+        { title: "How to Build Recurring Revenue as a Landscaper", href: "/blog/automate-client-follow-up-uk-service-businesses", description: "How landscaping companies are turning one-off jobs into monthly maintenance contracts — automatically." },
+      ]}
     />
   )
 }
