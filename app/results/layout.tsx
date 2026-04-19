@@ -8,6 +8,14 @@ export const metadata: Metadata = {
     title: "Client Results | JP Automations",
     description: "Real results from real UK trades businesses. £8,400 to £320 outstanding. +£16,800 in one winter. Admin cut from 8 hours to 30 minutes.",
     url: "https://www.jpautomations.co.uk/results",
+    type: "website",
+    images: [{ url: "https://www.jpautomations.co.uk/api/og?title=Client+Results&subtitle=Real+UK+Trades+Businesses%2C+Real+Numbers", width: 1200, height: 630, alt: "JP Automations Client Results" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Client Results | JP Automations",
+    description: "Real results from real UK trades businesses. £8,400 to £320 outstanding. +£16,800 in one winter. Admin cut from 8 hours to 30 minutes.",
+    images: ["https://www.jpautomations.co.uk/api/og?title=Client+Results&subtitle=Real+UK+Trades+Businesses%2C+Real+Numbers"],
   },
 }
 

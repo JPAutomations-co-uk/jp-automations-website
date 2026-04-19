@@ -370,6 +370,12 @@ export default function Page() {
           >
             Read: Invoice Automation Case Study &rarr;
           </Link>
+          <Link
+            href="/ai-automation-for-roofers-uk"
+            className="inline-flex items-center justify-center px-6 py-3 border border-white/20 rounded-xl hover:border-teal-400 hover:text-teal-400 transition text-sm"
+          >
+            AI Automation for Roofers &rarr;
+          </Link>
         </div>
 
       </article>

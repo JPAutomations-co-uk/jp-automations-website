@@ -91,6 +91,7 @@ export const metadata: Metadata = {
     description:
       "25+ hours reclaimed weekly. £10k+ recovered in month one. Under 24 hours to first paid deal. Real results from UK service businesses.",
     url: "https://www.jpautomations.co.uk/more",
+    type: "website",
     images: [
       {
         url: "https://www.jpautomations.co.uk/api/og?title=Client+Results+%26+Case+Studies&subtitle=JP+Automations",

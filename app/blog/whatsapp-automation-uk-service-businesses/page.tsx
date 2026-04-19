@@ -212,6 +212,7 @@ export default function Page() {
           <Link href="/blog" className="inline-flex items-center justify-center px-6 py-3 border border-white/20 rounded-xl hover:border-teal-400 hover:text-teal-400 transition text-sm">&larr; Back to Blog</Link>
           <Link href="/blog/automate-client-follow-up-uk-service-businesses" className="inline-flex items-center justify-center px-6 py-3 border border-white/20 rounded-xl hover:border-teal-400 hover:text-teal-400 transition text-sm">Read: Automate Client Follow-Up &rarr;</Link>
           <Link href="/blog/automate-google-reviews-uk-trades" className="inline-flex items-center justify-center px-6 py-3 border border-white/20 rounded-xl hover:border-teal-400 hover:text-teal-400 transition text-sm">Read: Automate Google Reviews &rarr;</Link>
+          <Link href="/ai-automation-for-service-businesses" className="inline-flex items-center justify-center px-6 py-3 border border-white/20 rounded-xl hover:border-teal-400 hover:text-teal-400 transition text-sm">AI Automation for Service Businesses &rarr;</Link>
         </div>
       </article>
     </main>

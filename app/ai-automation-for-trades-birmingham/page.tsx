@@ -1,4 +1,22 @@
 import type { Metadata } from "next"
+
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: "JP Automations — AI Automation for Birmingham Trades",
+  description: "AI automation systems for Birmingham tradespeople. Invoice automation, AI call handling, compliance, and lead generation built bespoke for UK trades.",
+  url: "https://www.jpautomations.co.uk/ai-automation-for-trades-birmingham",
+  logo: "https://www.jpautomations.co.uk/logo.png",
+  email: "jp@jpautomations.com",
+  areaServed: [
+    { "@type": "City", name: "Birmingham" },
+    { "@type": "AdministrativeArea", name: "West Midlands" },
+  ],
+  serviceType: ["AI Automation for Tradespeople", "Invoice Automation", "AI Call Handling", "Compliance Automation"],
+  priceRange: "££",
+  sameAs: ["https://www.instagram.com/jpautomations/", "https://youtube.com/@jpautomations", "https://www.linkedin.com/in/james-harvey-0583b2370/"],
+}
+
 import BirminghamClient from "./client"
 
 export const metadata: Metadata = {
@@ -25,5 +43,10 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-  return <BirminghamClient />
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }} />
+      <BirminghamClient />
+    </>
+  )
 }
