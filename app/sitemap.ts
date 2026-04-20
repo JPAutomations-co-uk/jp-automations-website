@@ -13,7 +13,6 @@ const blogPosts = [
   { slug: "ai-phone-answering-uk-tradespeople", date: "2026-03-30" },
   { slug: "automate-quoting-invoicing-uk-trades", date: "2026-04-02" },
   { slug: "ai-automation-cleaning-companies-uk", date: "2026-04-06" },
-  { slug: "crm-automation-personal-trainers-uk", date: "2026-04-09" },
   // New SEO blog posts — staggered publish dates
   { slug: "stop-losing-jobs-missed-calls-trades", date: "2026-03-28" },
   { slug: "automate-checkatrade-leads", date: "2026-03-31" },

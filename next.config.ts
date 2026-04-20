@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      { source: "/blog/crm-automation-personal-trainers-uk", destination: "/ai-automation-for-service-businesses", permanent: true },
       // Landing page redirects — old per-platform pages → unified Social Engine
       { source: "/apps/instagram-content", destination: "/apps/social-engine", permanent: true },
       { source: "/apps/linkedin-content", destination: "/apps/social-engine", permanent: true },

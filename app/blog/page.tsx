@@ -38,15 +38,6 @@ export const metadata: Metadata = {
 const allPosts = [
   // --- NEW ARTICLES (scheduled) ---
   {
-    title: "The PT's Guide to Running a Fully Automated Fitness Business",
-    excerpt:
-      "CRM, scheduling, and client management automation for personal trainers. How to run a fitness business that doesn't depend on you remembering everything.",
-    slug: "/crm-automation-personal-trainers-uk",
-    image: "/blog/crm-automation-personal-trainers-uk.jpg",
-    date: "9 April 2026",
-    publishDate: "2026-04-09",
-  },
-  {
     title: "How UK Cleaning Companies Are Using AI to Manage Clients, Staff, and Cash Flow",
     excerpt:
       "How cleaning businesses in the UK use AI automation for scheduling, quoting, client communication, and team management.",
